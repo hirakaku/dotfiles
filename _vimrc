@@ -25,7 +25,7 @@ if has('vim_starting')
 endif
 " }}}
 
-" @ github
+" @ github {{{
 NeoBundle 'Shougo/clang_complete'
 NeoBundle 'Shougo/echodoc'
 NeoBundle 'Shougo/neobundle.vim'
@@ -39,9 +39,12 @@ NeoBundle 'thinca/vim-poslist'
 NeoBundle 'thinca/vim-visualstar'
 NeoBundle 'vim-jp/vimdoc-ja'
 NeoBundle 'vim-scripts/ShowMarks'
+" }}}
 
-" @ vim-scripts
+" @ vim-scripts {{{
 NeoBundle 'sudo.vim'
+NeoBundle 'YankRing.vim'
+" }}}
 " }}}
 
 filetype plugin on
@@ -102,20 +105,29 @@ set number
 set textwidth=0
 set backspace=indent,eol,start
 
+" highlight nasty spaces
+highlight nasty_space ctermbg=RED
+match nasty_space /　\|\s\+$/
+
 " parenthesis
 set showmatch
 set matchtime=3
 
-" highlight nasty spaces
-highlight nasty_space ctermbg=RED
-match nasty_space /　\|\s\+$/
+" Plugin: YankRing {{{
+let g:yankring_max_history = 16
+let g:yankring_window_height = 11
+let g:yankring_manage_numbered_reg = 1
+let g:yankring_history_dir = expand('$HOME')
+let g:yankring_history_file = '.vim_yankring'
+" }}}
 " }}}
 
 " Option: mark {{{
 " Plugin: ShowMarks {{{
-let g:showmarks_include = "abcdefghijklmnopqrstuvwxyz"
-let g:showmarks_include .= "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+let g:showmarks_include = 'abcdefghijklmnopqrstuvwxyz'
+let g:showmarks_include .= 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
 let g:showmarks_include .= ".'`^<>[]{}()\""
+let g:showmarks_ignore_name = 'hm'
 highlight ShowMarksHLl ctermfg=Red ctermbg=DarkGray
 highlight ShowMarksHLu ctermfg=Blue ctermbg=DarkGray
 highlight ShowMarksHLo ctermfg=Gray ctermbg=DarkGray
@@ -161,13 +173,96 @@ endif
 " }}}
 
 " Option: completion {{{
-" command-mode completion
 set wildmenu
 set wildmode=longest,list,full
 
 " insert-mode completion
 set showfulltag
 set completeopt=longest,menuone,preview
+" }}}
+
+" Command: {{{
+command! -nargs=? -complete=help H :h <args> | :normal <C-w>L
+" }}}
+
+let mapleader = ','
+
+" Map: {{{
+nnoremap j gj
+nnoremap k gk
+
+nnoremap <Leader>vf :VimFiler 
+nnoremap <Leader>vw :w sudo:%
+
+" vimrc
+nnoremap <Leader>v :e ~/.vimrc<CR>
+nnoremap <Leader>V :so %<CR>
+
+" scratch buffer
+nnoremap <Leader>vt :e `=tempname()`<CR>
+nnoremap <Leader>vT :e `=strftime('%y%m%d-%H%M')`<CR>
+
+" xxd
+nnoremap <Leader>vx :set ft=xxd<CR>:%!xxd<CR>
+nnoremap <Leader>vX :%!xxd -r<CR>:e!<CR>
+
+" expand
+inoremap <expr> <C-r>:p expand('%')
+inoremap <expr> <C-r>:f expand('%:p')
+inoremap <expr> <C-r>:d expand('%:p:h')
+
+" select pasted
+nnoremap <expr> gV '`[' . strpart(getregtype(), 0, 1) . '`]'
+
+" substitution
+nnoremap ss s
+nnoremap se ce<C-r>0<ESC>
+nnoremap sE cE<C-r>0<ESC>
+nnoremap sw ciw<C-r>0<ESC>
+nnoremap sW ciW<C-r>0<ESC>
+nnoremap sC C<c-r>0<ESC>
+nnoremap sS S<C-r>0<ESC>
+nnoremap sp S<C-r>0<ESC>
+
+vnoremap ss s
+vnoremap sp c<C-r>0<ESC>
+" }}}
+
+" Map: neobundle {{{
+nnoremap <Leader>vbi :NeoBundleInstall<CR>
+nnoremap <Leader>vbc :NeoBundleClean<CR>
+nnoremap <Leader>vbd :NeoBundleDocs<CR>
+nnoremap <Leader>vbl :NeoBundleList<CR>
+" }}}
+
+" Map: poslist {{{
+map <C-o> <Plug>(poslist-prev-pos)
+map <C-i> <Plug>(poslist-next-pos)
+map <Leader><C-o> <Plug>(poslist-prev-buf)
+map <Leader><C-i> <Plug>(poslist-next-buf)
+" }}}
+
+" Map: visualstar {{{
+map * <Plug>(visualstar-*)N
+map # <Plug>(visualstar-#)N
+" }}}
+
+" Map: YankRing {{{
+nnoremap ys :YRShow<CR>
+nnoremap yc :YRClear<CR>
+" }}}
+
+" Map: cscope {{{
+if has('cscope')
+	nnoremap <Leader>tf :cs find file 
+	nnoremap <Leader>ti :cs find include 
+	nnoremap <Leader>tt :cs find text 
+	nnoremap <Leader>te :cs find egrep 
+	nnoremap <Leader>ts :cs find symbol 
+	nnoremap <Leader>tg :cs find global 
+	nnoremap <Leader>tc :cs find calls 
+	nnoremap <Leader>td :cs find called 
+endif
 " }}}
 
 " Autocmd: {{{
@@ -186,70 +281,6 @@ augroup format
 	autocmd FileType vim setlocal ts=2 sw=2 fdm=marker
 	autocmd FileType help nnoremap <buffer> q <C-w>c
 augroup END
-" }}}
-
-" Command: {{{
-command! -nargs=? -complete=help H :h <args> || :normal <C-w>L
-" }}}
-
-let mapleader = ','
-
-" Map: {{{
-nnoremap j gj
-nnoremap k gk
-
-nnoremap <Leader>vf :VimFiler 
-nnoremap <Leader>vw :w sudo:%
-
-" vimrc
-nnoremap <Leader>vv :e ~/.vimrc<CR>
-nnoremap <Leader>V :so %<CR>
-nnoremap <Leader>vt :e `=tempname()`<CR>
-nnoremap <Leader>vT :e `=strftime('%y%m%d-%H%M')`<CR>
-
-" xxd
-nnoremap <Leader>vx :set ft=xxd<CR>:%!xxd<CR>
-nnoremap <Leader>vX :%!xxd -r<CR>:e!<CR>
-
-" expand
-inoremap <expr> <C-r>:p expand('%')
-inoremap <expr> <C-r>:f expand('%:p')
-inoremap <expr> <C-r>:d expand('%:p:h')
-
-" select pasted
-nnoremap <expr> gp '`[' . strpart(getregtype(), 0, 1) . '`]'
-" }}}
-
-" Map: neobundle {{{
-nnoremap <Leader>vbl :NeoBundleList<CR>
-nnoremap <Leader>vbi :NeoBundleInstall<CR>
-nnoremap <Leader>vbc :NeoBundleClean<CR>
-nnoremap <Leader>vbd :NeoBundleDocs<CR>
-" }}}
-
-" Map: poslist {{{
-map <C-o> <Plug>(poslist-prev-pos)
-map <C-i> <Plug>(poslist-next-pos)
-map <C-S-o> <Plug>(poslist-prev-buf)
-map <C-S-i> <Plug>(poslist-next-buf)
-" }}}
-
-" Map: visualstar {{{
-map * <Plug>(visualstar-*)N
-map # <Plug>(visualstar-#)N
-" }}}
-
-" Map: cscope {{{
-if has('cscope')
-	nnoremap <Leader>tf :cs find file 
-	nnoremap <Leader>ti :cs find include 
-	nnoremap <Leader>tt :cs find text 
-	nnoremap <Leader>te :cs find egrep 
-	nnoremap <Leader>ts :cs find symbol 
-	nnoremap <Leader>tg :cs find global 
-	nnoremap <Leader>tc :cs find calls 
-	nnoremap <Leader>td :cs find called 
-endif
 " }}}
 
 " vim: ts=2 sw=2 fdm=marker
