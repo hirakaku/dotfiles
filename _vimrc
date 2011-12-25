@@ -1,6 +1,6 @@
 " File:			dotfiles/_vimrc
 " Author:		hirakaku <hirakaku@gmail.com>
-" Version:	v0.1a
+" Version:	v0.1b
 
 set nocompatible
 colorscheme elflord
@@ -26,6 +26,14 @@ endif
 " }}}
 
 " @ github {{{
+NeoBundle 'gregsexton/VimCalc'
+NeoBundle 'houtsnip/vim-emacscommandline'
+NeoBundle 'kana/vim-textobj-fold'
+NeoBundle 'kana/vim-textobj-indent'
+NeoBundle 'kana/vim-textobj-lastpat'
+NeoBundle 'kana/vim-textobj-user'
+NeoBundle 'Lokaltog/vim-easymotion'
+NeoBundle 'nathanaelkane/vim-indent-guides'
 NeoBundle 'Shougo/clang_complete'
 NeoBundle 'Shougo/echodoc'
 NeoBundle 'Shougo/neobundle.vim'
@@ -36,12 +44,21 @@ NeoBundle 'Shougo/vimproc'
 NeoBundle 'Shougo/vimshell'
 NeoBundle 'Shougo/vinarise'
 NeoBundle 'thinca/vim-poslist'
+NeoBundle 'thinca/vim-ref'
 NeoBundle 'thinca/vim-visualstar'
+NeoBundle 'tomtom/tcomment_vim'
+NeoBundle 'tpope/vim-abolish'
+NeoBundle 'tpope/vim-fugitive'
+NeoBundle 'tpope/vim-speeddating'
+NeoBundle 'tpope/vim-surround'
+NeoBundle 'tsukkee/unite-tag'
 NeoBundle 'vim-jp/vimdoc-ja'
 NeoBundle 'vim-scripts/ShowMarks'
 " }}}
 
 " @ vim-scripts {{{
+NeoBundle 'DirDiff.vim'
+NeoBundle 'errormarker.vim'
 NeoBundle 'sudo.vim'
 NeoBundle 'YankRing.vim'
 " }}}
@@ -109,9 +126,21 @@ set backspace=indent,eol,start
 highlight nasty_space ctermbg=RED
 match nasty_space /　\|\s\+$/
 
+" Plugin: indent-guides {{{
+" <Leader>ig => enable / disable
+" let g:indent_guides_enable_on_vim_startup = 1
+let g:indent_guides_guide_size = 1
+let g:indent_guides_auto_colors = 0
+highlight IndentGuidesOdd ctermbg=DarkRed
+highlight IndentGuidesEven ctermbg=DarkBlue
+" }}}
+
 " parenthesis
 set showmatch
 set matchtime=3
+
+" matchit
+runtime macros/matchit.vim
 
 " Plugin: YankRing {{{
 let g:yankring_max_history = 16
@@ -126,12 +155,19 @@ let g:yankring_history_file = '.vim_yankring'
 " Plugin: ShowMarks {{{
 let g:showmarks_include = 'abcdefghijklmnopqrstuvwxyz'
 let g:showmarks_include .= 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
-let g:showmarks_include .= ".'`^<>[]{}()\""
+" let g:showmarks_include .= ".'`^<>[]{}()\""
 let g:showmarks_ignore_name = 'hm'
 highlight ShowMarksHLl ctermfg=Red ctermbg=DarkGray
 highlight ShowMarksHLu ctermfg=Blue ctermbg=DarkGray
 highlight ShowMarksHLo ctermfg=Gray ctermbg=DarkGray
 highlight ShowMarksHLm ctermfg=White ctermbg=DarkGray
+" }}}
+
+" Plugin: errormarker {{{
+let g:errormarker_errortext = '!!'
+let g:errormarker_warningtext = '??'
+let g:errormaker_errorgroup = 'Error'
+let g:Errormaker_warninggroup = 'Todo'
 " }}}
 " }}}
 
@@ -191,11 +227,13 @@ let mapleader = ','
 nnoremap j gj
 nnoremap k gk
 
-nnoremap <Leader>vf :VimFiler 
+nnoremap <Leader>vc :Calc<CR>
+nnoremap <Leader>vf :VimFiler<CR>
 nnoremap <Leader>vw :w sudo:%
 
 " vimrc
 nnoremap <Leader>v :e ~/.vimrc<CR>
+nnoremap <Leader>vv :e ~/.vimrc<CR>
 nnoremap <Leader>V :so %<CR>
 
 " scratch buffer
@@ -206,10 +244,13 @@ nnoremap <Leader>vT :e `=strftime('%y%m%d-%H%M')`<CR>
 nnoremap <Leader>vx :set ft=xxd<CR>:%!xxd<CR>
 nnoremap <Leader>vX :%!xxd -r<CR>:e!<CR>
 
-" expand
-inoremap <expr> <C-r>:p expand('%')
-inoremap <expr> <C-r>:f expand('%:p')
-inoremap <expr> <C-r>:d expand('%:p:h')
+" highlight
+nnoremap <Leader>vh :so $VIMRUNTIME/syntax/hitest.vim<CR>
+nnoremap <ESC><ESC> :noh<CR>
+
+" indent
+vnoremap < <gv
+vnoremap > >gv
 
 " select pasted
 nnoremap <expr> gV '`[' . strpart(getregtype(), 0, 1) . '`]'
@@ -223,9 +264,16 @@ nnoremap sW ciW<C-r>0<ESC>
 nnoremap sC C<c-r>0<ESC>
 nnoremap sS S<C-r>0<ESC>
 nnoremap sp S<C-r>0<ESC>
-
 vnoremap ss s
 vnoremap sp c<C-r>0<ESC>
+
+" expand
+inoremap <expr> <C-r>:p expand('%')
+inoremap <expr> <C-r>:f expand('%:p')
+inoremap <expr> <C-r>:d expand('%:p:h')
+
+" EasyMotion
+let g:EasyMotion_leader_key = '<C-j>'
 " }}}
 
 " Map: neobundle {{{
@@ -233,6 +281,12 @@ nnoremap <Leader>vbi :NeoBundleInstall<CR>
 nnoremap <Leader>vbc :NeoBundleClean<CR>
 nnoremap <Leader>vbd :NeoBundleDocs<CR>
 nnoremap <Leader>vbl :NeoBundleList<CR>
+" }}}
+
+" Map: fugitive {{{
+nnoremap <Leader>gs :Gstatus<CR>
+nnoremap <Leader>gl :Git log<CR>
+nnoremap <Leader>gd :Gdiff<CR>
 " }}}
 
 " Map: poslist {{{
@@ -248,8 +302,8 @@ map # <Plug>(visualstar-#)N
 " }}}
 
 " Map: YankRing {{{
-nnoremap ys :YRShow<CR>
-nnoremap yc :YRClear<CR>
+nnoremap yr :YRShow<CR>
+" nnoremap yrc :YRClear<CR>
 " }}}
 
 " Map: cscope {{{
@@ -268,7 +322,7 @@ endif
 " Autocmd: {{{
 augroup noname
 	autocmd!
-	autocmd BufEnter * lcd %:p:h
+	" autocmd BufEnter * lcd %:p:h
 	autocmd BufReadPost * if line("'\"") > 1 && line("'\"") <= line("$") | exe "normal! g`\"" | endif
 augroup END
 " }}}
