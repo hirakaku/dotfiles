@@ -99,7 +99,7 @@ set statusline=%<%f\ %y%q
 set statusline+=%{'['.GetFencAndFF().']'}%w%m
 set statusline+=\ %(%l,%c%)\ %L*%P
 
-" Function: GetFencAndFF {{{
+" Function: GetFencAndFF() {{{
 function! GetFencAndFF()
 	if &fenc == 'utf-8' | let fenc = 'u'
 	elseif &fenc == 'euc-jp' | let fenc = 'e'
@@ -121,10 +121,6 @@ endfunction
 set number
 set textwidth=0
 set backspace=indent,eol,start
-
-" highlight nasty spaces
-highlight nasty_space ctermbg=RED
-match nasty_space /　\|\s\+$/
 
 " Plugin: indent-guides {{{
 " <Leader>ig => enable / disable
@@ -192,7 +188,7 @@ if has('cscope')
 		let g:cscope_file = dir . '/cscope.out'
 		if filereadable(g:cscope_file)
 			let g:cscope_dir = dir
-			exe 'cscope add ' . g:cscope_file . ' ' . g:cscope_dir
+			exe "cscope add " . g:cscope_file . " " . g:cscope_dir
 			break
 		endif
 		let dir = fnamemodify(dir, ':h')
@@ -215,6 +211,27 @@ set wildmode=longest,list,full
 " insert-mode completion
 set showfulltag
 set completeopt=longest,menuone,preview
+" }}}
+
+" Function: AlignAbove() {{{
+function! AlignAbove()
+	exe "silent normal Whr\<Tab>\<Esc>W"
+	let pos = getpos('.')
+	let start = virtcol('.')
+
+	exe "silent normal " . (pos[1] - 1) . "G" . start . "|bW"
+	let diff = virtcol('.') - start
+
+	call setpos('.', pos)
+
+	let i = 0
+	while i < diff
+		exe "silent normal i\<Tab>\<Esc>"
+		let i += &tabstop
+	endwhile
+endfunction
+
+nnoremap <Leader>faa :call AlignAbove()<CR>jF,
 " }}}
 
 " Command: {{{
@@ -271,9 +288,6 @@ vnoremap sp c<C-r>0<ESC>
 inoremap <expr> <C-r>:p expand('%')
 inoremap <expr> <C-r>:f expand('%:p')
 inoremap <expr> <C-r>:d expand('%:p:h')
-
-" EasyMotion
-let g:EasyMotion_leader_key = '<C-j>'
 " }}}
 
 " Map: neobundle {{{
@@ -287,6 +301,11 @@ nnoremap <Leader>vbl :NeoBundleList<CR>
 nnoremap <Leader>gs :Gstatus<CR>
 nnoremap <Leader>gl :Git log<CR>
 nnoremap <Leader>gd :Gdiff<CR>
+" }}}
+
+" Map: EasyMotion {{{
+let g:EasyMotion_leader_key = '_'
+nnoremap __ _
 " }}}
 
 " Map: poslist {{{
@@ -322,8 +341,9 @@ endif
 " Autocmd: {{{
 augroup noname
 	autocmd!
+	autocmd VimEnter * cmap <C-w> <M-BS>
 	" autocmd BufEnter * lcd %:p:h
-	autocmd BufReadPost * if line("'\"") > 1 && line("'\"") <= line("$") | exe "normal! g`\"" | endif
+	autocmd BufReadPost * if line("'\"") > 1 && line("'\"") <= line('$') | exe "normal! g`\"" | endif
 augroup END
 " }}}
 
@@ -335,6 +355,11 @@ augroup format
 	autocmd FileType vim setlocal ts=2 sw=2 fdm=marker
 	autocmd FileType help nnoremap <buffer> q <C-w>c
 augroup END
+" }}}
+
+" Autocmd: nasty space {{{
+highlight nasty_space ctermbg=RED
+autocmd VimEnter,WinEnter * match nasty_space /　\|\s\+$/ 
 " }}}
 
 " vim: ts=2 sw=2 fdm=marker
