@@ -1,6 +1,6 @@
 " File:			dotfiles/_vimrc
 " Author:		hirakaku <hirakaku@gmail.com>
-" Version:	v0.1b
+" Version:	v0.1c
 
 set nocompatible
 colorscheme elflord
@@ -44,6 +44,7 @@ NeoBundle 'Shougo/vimproc'
 NeoBundle 'Shougo/vimshell'
 NeoBundle 'Shougo/vinarise'
 NeoBundle 'thinca/vim-poslist'
+NeoBundle 'thinca/vim-quickrun'
 NeoBundle 'thinca/vim-ref'
 NeoBundle 'thinca/vim-visualstar'
 NeoBundle 'tomtom/tcomment_vim'
@@ -70,10 +71,53 @@ filetype indent on
 " Option: env {{{
 set path=.,,/usr/local/include,/usr/include,./include
 let $tmpdirs = '~/tmp,/var/tmp,/tmp'
+let $tctdir = '~/dev/scqemu/test/tct'
 
 " language and encoding
 set helplang=en,ja
 set fileencodings=iso-2022-jp,euc-jp,utf-8,cp932
+
+" Plugin: quickrun {{{
+let quickrun_config = {}
+
+let quickrun_config._ = {
+			\ 'runner': 'vimproc',
+			\ 'runner/vimproc/updatetime': 100,
+			\ 'outputter': 'error',
+			\ 'outputter/buffer/split': 'rightb 8sp',
+			\ 'outputter/error/error': 'quickfix',
+			\ 'cmdopt': '%{b:cmdopt}',
+			\ 'args': '%{b:args}',
+			\ }
+
+" outputter mixed {{{
+let quickrun_mixed = quickrun#outputter#multi#new()
+let quickrun_mixed.config.targets = ['buffer', 'quickfix']
+
+function! quickrun_mixed.init(session)
+	cclose
+	call call(quickrun#outputter#multi#new().init, [a:session], self)
+endfunction
+
+function! quickrun_mixed.finish(session)
+	call call(quickrun#outputter#multi#new().finish, [a:session], self)
+	bwipeout [quickrun
+endfunction
+
+call quickrun#register_outputter('mixed', quickrun_mixed)
+" }}}
+
+let quickrun_config.tct = {
+			\ 'exec': ['%c %o %s %a',
+			\ 'qemu-system-tct -nographic -kernel a.out 2>&1'],
+			\ 'command': 'tct-elf-gcc',
+			\ 'cmdopt': expand('-T $tctdir/tct.ld $tctdir/opc/crt0.s'),
+			\ 'outputter': 'mixed',
+			\ }
+
+let quickrun_config['c.tct'] = quickrun_config.tct
+let quickrun_config['asm.tct'] = quickrun_config.tct
+" }}}
 " }}}
 
 " Option: history {{{
@@ -89,7 +133,7 @@ set swapfile
 set directory=$tmpdirs
 
 " Plugin: poslist {{{
-let g:poslist_histsize = 1024 * 1024
+let poslist_histsize = 1024 * 1024
 " }}}
 " }}}
 
@@ -97,7 +141,7 @@ let g:poslist_histsize = 1024 * 1024
 set laststatus=2
 set statusline=%<%f\ %y%q
 set statusline+=%{'['.GetFencAndFF().']'}%w%m
-set statusline+=\ %(%l,%c%)\ %L*%P
+set statusline+=\ %(%l,%v%)\ %L*%P
 
 " Function: GetFencAndFF() {{{
 function! GetFencAndFF()
@@ -124,9 +168,9 @@ set backspace=indent,eol,start
 
 " Plugin: indent-guides {{{
 " <Leader>ig => enable / disable
-" let g:indent_guides_enable_on_vim_startup = 1
-let g:indent_guides_guide_size = 1
-let g:indent_guides_auto_colors = 0
+" let indent_guides_enable_on_vim_startup = 1
+let indent_guides_guide_size = 1
+let indent_guides_auto_colors = 0
 highlight IndentGuidesOdd ctermbg=DarkRed
 highlight IndentGuidesEven ctermbg=DarkBlue
 " }}}
@@ -139,20 +183,20 @@ set matchtime=3
 runtime macros/matchit.vim
 
 " Plugin: YankRing {{{
-let g:yankring_max_history = 16
-let g:yankring_window_height = 11
-let g:yankring_manage_numbered_reg = 1
-let g:yankring_history_dir = expand('$HOME')
-let g:yankring_history_file = '.vim_yankring'
+let yankring_max_history = 16
+let yankring_window_height = 11
+let yankring_manage_numbered_reg = 1
+let yankring_history_dir = expand('~/')
+let yankring_history_file = '.vim_yankring'
 " }}}
 " }}}
 
 " Option: mark {{{
 " Plugin: ShowMarks {{{
-let g:showmarks_include = 'abcdefghijklmnopqrstuvwxyz'
-let g:showmarks_include .= 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
-" let g:showmarks_include .= ".'`^<>[]{}()\""
-let g:showmarks_ignore_name = 'hm'
+let showmarks_include = 'abcdefghijklmnopqrstuvwxyz'
+let showmarks_include .= 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
+" let showmarks_include .= ".'`^<>[]{}()\""
+let showmarks_ignore_name = 'hm'
 highlight ShowMarksHLl ctermfg=Red ctermbg=DarkGray
 highlight ShowMarksHLu ctermfg=Blue ctermbg=DarkGray
 highlight ShowMarksHLo ctermfg=Gray ctermbg=DarkGray
@@ -160,10 +204,10 @@ highlight ShowMarksHLm ctermfg=White ctermbg=DarkGray
 " }}}
 
 " Plugin: errormarker {{{
-let g:errormarker_errortext = '!!'
-let g:errormarker_warningtext = '??'
-let g:errormaker_errorgroup = 'Error'
-let g:Errormaker_warninggroup = 'Todo'
+let errormarker_errortext = '!!'
+let errormarker_warningtext = '??'
+let errormaker_errorgroup = 'Error'
+let Errormaker_warninggroup = 'Todo'
 " }}}
 " }}}
 
@@ -180,26 +224,27 @@ set tags=./tags,tags;
 if has('cscope')
 	set cscopetag
 	set cscopequickfix=t-,e-,s-,g-,c-,d-
-	set nocscopeverbose
 
-	" Script: cscope.out auto detection {{{
-	let dir = getcwd()
-	while dir != '/'
-		let g:cscope_file = dir . '/cscope.out'
-		if filereadable(g:cscope_file)
-			let g:cscope_dir = dir
-			exe "cscope add " . g:cscope_file . " " . g:cscope_dir
-			break
-		endif
-		let dir = fnamemodify(dir, ':h')
-	endwhile
+	" Function: DetectCscopeOut() {{{
+	function! DetectCscopeOut(dir)
+		let dir = a:dir
+		while dir != '/'
+			let g:cscope_file = dir . '/cscope.out'
+			if filereadable(g:cscope_file)
+				let g:cscope_dir = dir
+				exe "cscope add " . g:cscope_file . " " . g:cscope_dir
+				break
+			endif
+			let dir = fnamemodify(dir, ':h')
+		endwhile
+	endfunction
+	" }}}
+
+	call DetectCscopeOut(getcwd())
 
 	if $CSCOPE_DB != ''
 		cscope add $CSCOPE_DB
 	endif
-
-	set cscopeverbose
-	" }}}
 endif
 " }}}
 " }}}
@@ -213,27 +258,6 @@ set showfulltag
 set completeopt=longest,menuone,preview
 " }}}
 
-" Function: AlignAbove() {{{
-function! AlignAbove()
-	exe "silent normal Whr\<Tab>\<Esc>W"
-	let pos = getpos('.')
-	let start = virtcol('.')
-
-	exe "silent normal " . (pos[1] - 1) . "G" . start . "|bW"
-	let diff = virtcol('.') - start
-
-	call setpos('.', pos)
-
-	let i = 0
-	while i < diff
-		exe "silent normal i\<Tab>\<Esc>"
-		let i += &tabstop
-	endwhile
-endfunction
-
-nnoremap <Leader>faa :call AlignAbove()<CR>jF,
-" }}}
-
 " Command: {{{
 command! -nargs=? -complete=help H :h <args> | :normal <C-w>L
 " }}}
@@ -244,8 +268,14 @@ let mapleader = ','
 nnoremap j gj
 nnoremap k gk
 
+nnoremap <Leader>:e :e %:h/
+nnoremap <Leader>:n :new %:h/
+nnoremap <Leader>:v :vnew %:h/
+nnoremap <Leader>:t :tabe %:h/
+
 nnoremap <Leader>vc :Calc<CR>
 nnoremap <Leader>vf :VimFiler<CR>
+nnoremap <Leader>vs :w !sh<CR>
 nnoremap <Leader>vw :w sudo:%
 
 " vimrc
@@ -303,8 +333,12 @@ nnoremap <Leader>gl :Git log<CR>
 nnoremap <Leader>gd :Gdiff<CR>
 " }}}
 
+" Plugin: quickrun {{{
+map <Leader>r :QuickRun<CR>
+" }}}
+
 " Map: EasyMotion {{{
-let g:EasyMotion_leader_key = '_'
+let EasyMotion_leader_key = '_'
 nnoremap __ _
 " }}}
 
@@ -343,7 +377,17 @@ augroup noname
 	autocmd!
 	autocmd VimEnter * cmap <C-w> <M-BS>
 	" autocmd BufEnter * lcd %:p:h
-	autocmd BufReadPost * if line("'\"") > 1 && line("'\"") <= line('$') | exe "normal! g`\"" | endif
+	autocmd VimEnter ~/.vimrc
+				\	let $pwd = fnamemodify(
+				\ system('ls -l ' . expand('%') . "| cut -d' ' -f 10"),
+				\	':p:h')
+				\ | lcd $pwd
+	autocmd BufReadPost ~/dev/linux-stable/*
+				\	set path^=~/dev/linux-stable/include
+	autocmd BufReadPost *
+				\	if line("'\"") > 1 && line("'\"") <= line('$')
+				\	| exe "normal! g`\""
+				\	| endif
 augroup END
 " }}}
 
@@ -359,7 +403,7 @@ augroup END
 
 " Autocmd: nasty space {{{
 highlight nasty_space ctermbg=RED
-autocmd VimEnter,WinEnter * match nasty_space /　\|\s\+$/ 
+autocmd VimEnter,WinEnter * match nasty_space /　\|\s\+$/
 " }}}
 
 " vim: ts=2 sw=2 fdm=marker
