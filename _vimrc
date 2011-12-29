@@ -70,8 +70,8 @@ filetype indent on
 
 " Option: env {{{
 set path=.,,/usr/local/include,/usr/include,./include
-let $tmpdirs = '~/tmp,/var/tmp,/tmp'
-let $tctdir = '~/dev/scqemu/test/tct'
+let $tmp_dirs = '~/tmp,/var/tmp,/tmp'
+let $tct_dir = '~/dev/scqemu/test/tct'
 
 " language and encoding
 set helplang=en,ja
@@ -111,7 +111,7 @@ let quickrun_config.tct = {
 			\ 'exec': ['%c %o %s %a',
 			\ 'qemu-system-tct -nographic -kernel a.out 2>&1'],
 			\ 'command': 'tct-elf-gcc',
-			\ 'cmdopt': expand('-T $tctdir/tct.ld $tctdir/opc/crt0.s'),
+			\ 'cmdopt': expand('-T $tct_dir/tct.ld $tct_dir/opc/crt0.s'),
 			\ 'outputter': 'mixed',
 			\ }
 
@@ -130,7 +130,7 @@ set undolevels=1024
 
 " swap
 set swapfile
-set directory=$tmpdirs
+set directory=$tmp_dirs
 
 " Plugin: poslist {{{
 let poslist_histsize = 1024 * 1024
@@ -227,16 +227,21 @@ if has('cscope')
 
 	" Function: DetectCscopeOut() {{{
 	function! DetectCscopeOut(dir)
-		let dir = a:dir
-		while dir != '/'
+		let dir = expand(a:dir)
+
+		while dir != '/' && stridx(dir, '/') != -1
 			let g:cscope_file = dir . '/cscope.out'
+
 			if filereadable(g:cscope_file)
 				let g:cscope_dir = dir
 				exe "cscope add " . g:cscope_file . " " . g:cscope_dir
-				break
+				return g:cscope_file
 			endif
+
 			let dir = fnamemodify(dir, ':h')
 		endwhile
+
+		return ''
 	endfunction
 	" }}}
 
@@ -259,7 +264,35 @@ set completeopt=longest,menuone,preview
 " }}}
 
 " Command: {{{
-command! -nargs=? -complete=help H :h <args> | :normal <C-w>L
+command! -nargs=? -complete=help H
+			\ h <args> | normal <C-w>L
+" }}}
+
+" Command: Make {{{
+" Function: FindBuild() {{{
+function! FindBuild(dir)
+	let dir = expand(a:dir)
+
+	while dir != '/' && stridx(dir, '/') != -1
+		let tmp = dir . '/build'
+
+		if isdirectory(tmp)
+			return tmp
+		endif
+
+		let dir = fnamemodify(dir, ':h')
+	endwhile
+
+	return ''
+endfunction
+" }}}
+
+command! -nargs=? Make
+			\ let b:build_dir = FindBuild(getcwd()) |
+			\ | if b:build_dir != ''
+				\ | echo b:build_dir
+				\ | exe 'make -C ' . b:build_dir . ' <args>'
+				\ | endif
 " }}}
 
 let mapleader = ','
@@ -275,6 +308,7 @@ nnoremap <Leader>:t :tabe %:h/
 
 nnoremap <Leader>vc :Calc<CR>
 nnoremap <Leader>vf :VimFiler<CR>
+nnoremap <Leader>vm :Make 
 nnoremap <Leader>vs :w !sh<CR>
 nnoremap <Leader>vw :w sudo:%
 
@@ -333,7 +367,7 @@ nnoremap <Leader>gl :Git log<CR>
 nnoremap <Leader>gd :Gdiff<CR>
 " }}}
 
-" Plugin: quickrun {{{
+" Map: quickrun {{{
 map <Leader>r :QuickRun<CR>
 " }}}
 
@@ -377,11 +411,6 @@ augroup noname
 	autocmd!
 	autocmd VimEnter * cmap <C-w> <M-BS>
 	" autocmd BufEnter * lcd %:p:h
-	autocmd VimEnter ~/.vimrc
-				\	let $pwd = fnamemodify(
-				\ system('ls -l ' . expand('%') . "| cut -d' ' -f 10"),
-				\	':p:h')
-				\ | lcd $pwd
 	autocmd BufReadPost ~/dev/linux-stable/*
 				\	set path^=~/dev/linux-stable/include
 	autocmd BufReadPost *
