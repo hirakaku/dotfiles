@@ -26,8 +26,10 @@ endif
 " }}}
 
 " @ github {{{
+NeoBundle 'fuenor/vim-wordcount'
 NeoBundle 'gregsexton/VimCalc'
 NeoBundle 'houtsnip/vim-emacscommandline'
+NeoBundle 'kana/vim-smartchr'
 NeoBundle 'kana/vim-textobj-fold'
 NeoBundle 'kana/vim-textobj-indent'
 NeoBundle 'kana/vim-textobj-lastpat'
@@ -55,9 +57,11 @@ NeoBundle 'tpope/vim-surround'
 NeoBundle 'tsukkee/unite-tag'
 NeoBundle 'vim-jp/vimdoc-ja'
 NeoBundle 'vim-scripts/ShowMarks'
+NeoBundle 'zhaocai/unite-scriptnames'
 " }}}
 
 " @ vim-scripts {{{
+" NeoBundle 'autodate.vim'
 NeoBundle 'DirDiff.vim'
 NeoBundle 'errormarker.vim'
 NeoBundle 'sudo.vim'
@@ -76,6 +80,38 @@ let $tct_dir = '~/dev/scqemu/test/tct'
 " language and encoding
 set helplang=en,ja
 set fileencodings=iso-2022-jp,euc-jp,utf-8,cp932
+
+" Command: H {{{
+command! -nargs=? -complete=help H
+			\ h <args> | normal <C-w>L
+" }}}
+
+" Command: Make {{{
+" Function: FindBuild() {{{
+function! FindBuild(dir)
+	let dir = expand(a:dir)
+
+	while dir != '/' && stridx(dir, '/') != -1
+		let build = dir . '/build'
+
+		if isdirectory(build)
+			return build
+		endif
+
+		let dir = fnamemodify(dir, ':h')
+	endwhile
+
+	return ''
+endfunction
+" }}}
+
+command! -nargs=? Make
+			\ let b:build_dir = FindBuild(getcwd()) |
+			\ | if b:build_dir != ''
+				\ | echo b:build_dir
+				\ | exe 'make -C ' . b:build_dir . ' <args>'
+				\ | endif
+" }}}
 
 " Plugin: quickrun {{{
 let quickrun_config = {}
@@ -146,9 +182,18 @@ let poslist_histsize = 1024 * 1024
 
 " Option: statusline {{{
 set laststatus=2
-set statusline=%<%f\ %y%q
-set statusline+=%{'['.GetFencAndFF().']'}%w%m
-set statusline+=\ %(%l,%v%)\ %L*%P
+set updatetime=60
+set statusline=%f\ %y%q
+set statusline+=%{'['.GetFencAndFF().']'}
+set statusline+=%w%m
+set statusline+=%<
+set statusline+=[%{WordCount()}]
+set statusline+=%=
+set statusline+=%04l,%04v\ %L*%P
+
+" Plugin: wordcount {{{
+exe 'source ' . expand($dotvim) . '/bundle/vim-wordcount/wordcount.vim'
+" }}}
 
 " Function: GetFencAndFF() {{{
 function! GetFencAndFF()
@@ -268,38 +313,24 @@ set wildmode=longest,list,full
 " insert-mode completion
 set showfulltag
 set completeopt=longest,menuone,preview
+
+" " Plugin: autodate.vim {{{
+" let autodate_keyword_pre = 'Update:'
+" let autodate_keyword_post = '.'
+" let autodate_format = '%y/%m/%d %T'
+" " }}}
+
+" Plugin: necomplcache {{{
+let neocomplcache_enable_at_startup = 1
+let neocomplcache_temporary_dir = $dotvim . '/.neocon'
+let neocomplcache_snippets_dir = $dotvim . '/snip'
+let neocomplcache_enable_underbar_completion = 1
+
+" Command: neocomplcache {{{
+command! -nargs=* NecoSnip NeoComplCacheEditSnippets <args>
+command! -nargs=* NecoRSnip NeoComplCacheEditRuntimeSnippets <args>
 " }}}
-
-" Command: {{{
-command! -nargs=? -complete=help H
-			\ h <args> | normal <C-w>L
 " }}}
-
-" Command: Make {{{
-" Function: FindBuild() {{{
-function! FindBuild(dir)
-	let dir = expand(a:dir)
-
-	while dir != '/' && stridx(dir, '/') != -1
-		let build = dir . '/build'
-
-		if isdirectory(build)
-			return build
-		endif
-
-		let dir = fnamemodify(dir, ':h')
-	endwhile
-
-	return ''
-endfunction
-" }}}
-
-command! -nargs=? Make
-			\ let b:build_dir = FindBuild(getcwd()) |
-			\ | if b:build_dir != ''
-				\ | echo b:build_dir
-				\ | exe 'make -C ' . b:build_dir . ' <args>'
-				\ | endif
 " }}}
 
 let mapleader = ','
@@ -320,9 +351,10 @@ nnoremap <Leader>vs :w !sh<CR>
 nnoremap <Leader>vw :w sudo:%
 
 " vimrc
-nnoremap <Leader>v :e ~/.vimrc<CR>
-nnoremap <Leader>vv :e ~/.vimrc<CR>
-nnoremap <Leader>V :so %<CR>
+nnoremap <Leader>v	:e ~/.vimrc<CR>
+nnoremap <Leader>vv	:vnew ~/.vimrc<CR><C-w>L
+nnoremap <Leader>vV	:tabe ~/.vimrc<CR>
+nnoremap <Leader>V	:so %<CR>
 
 " scratch buffer
 nnoremap <Leader>vt :e `=tempname()`<CR>
@@ -340,7 +372,13 @@ nnoremap <ESC><ESC> :noh<CR>
 vnoremap < <gv
 vnoremap > >gv
 
-" select pasted
+" selection
+vnoremap <Leader>n ojok
+vnoremap <Leader>N okoj
+vnoremap a/ :<C-u>silent! normal! [/V]/<CR>
+vnoremap a* :<C-u>silent! normal! [*V]*<CR>
+vnoremap i/ :<C-u>silent! normal! [/jV]/k<CR>
+vnoremap i* :<C-u>silent! normal! [*jV]*k<CR>
 nnoremap <expr> gV '`[' . strpart(getregtype(), 0, 1) . '`]'
 
 " substitution
@@ -356,8 +394,11 @@ vnoremap ss		s
 vnoremap sp		c<C-r>0<ESC>
 
 " expand
-inoremap <expr> <C-r>:p expand('%')
-inoremap <expr> <C-r>:f expand('%:p')
+inoremap <expr> <C-r>:: expand('%')
+inoremap <expr> <C-r>:/ expand('%:p')
+inoremap <expr> <C-r>:~ expand('%:~')
+inoremap <expr> <C-r>:. expand('%:.')
+inoremap <expr> <C-r>:f expand('%:t')
 inoremap <expr> <C-r>:d expand('%:p:h')
 " }}}
 
@@ -377,11 +418,14 @@ nnoremap <Leader>ur		:Unite ref
 nnoremap <Leader>urm	:Unite ref/man<CR>
 nnoremap <Leader>urpl :Unite ref/perldoc<CR>
 nnoremap <Leader>urpy :Unite ref/pydoc<CR>
+nnoremap <Leader>uv		:Unite scriptnames<CR>
+nnoremap <Leader>us		:Unite snippet<CR>
 " }}}
 
 " Map: fugitive {{{
 nnoremap <Leader>gs :Gstatus<CR>
 nnoremap <Leader>gl :Git log<CR>
+nnoremap <Leader>gt :Git tag<CR>
 nnoremap <Leader>gd :Gdiff<CR>
 " }}}
 
@@ -401,14 +445,14 @@ map <Leader><C-o> <Plug>(poslist-prev-buf)
 map <Leader><C-i> <Plug>(poslist-next-buf)
 " }}}
 
+" Map: YankRing {{{
+nnoremap yr :YRShow<CR>
+nnoremap yc :YRClear<CR>
+" }}}
+
 " Map: visualstar {{{
 map * <Plug>(visualstar-*)N
 map # <Plug>(visualstar-#)N
-" }}}
-
-" Map: YankRing {{{
-nnoremap yr :YRShow<CR>
-" nnoremap yrc :YRClear<CR>
 " }}}
 
 " Map: cscope {{{
@@ -422,6 +466,18 @@ if has('cscope')
 	nnoremap <Leader>tc :cs find calls 
 	nnoremap <Leader>td :cs find called 
 endif
+" }}}
+
+" Map: smartchr {{{
+inoremap <expr> = smartchr#loop(' = ', '=', ' == ')
+inoremap <expr> , smartchr#one_of(', ', ',')
+" }}}
+
+" Map: neocomplcache {{{
+nnoremap <Leader>ns :NecoSnip 
+nnoremap <Leader>nS :NecoRSnip 
+imap <C-k> <Plug>(neocomplcache_snippets_expand)
+smap <C-k> <Plug>(neocomplcache_snippets_expand)
 " }}}
 
 " Autocmd: {{{
@@ -438,12 +494,12 @@ augroup noname
 augroup END
 " }}}
 
-" Autocmd: format {{{
-augroup format
+" Autocmd: FileType {{{
+augroup filetype
 	autocmd!
 	autocmd FileType * setlocal formatoptions-=ro
-	autocmd FileType * setlocal ts=4 sw=4 fdm=marker
-	autocmd FileType vim setlocal ts=2 sw=2 fdm=marker
+	" autocmd FileType * setlocal ts=4 sw=4 fdm=marker
+	" autocmd FileType vim setlocal ts=2 sw=2 fdm=marker
 	autocmd FileType help nnoremap <buffer> q <C-w>c
 augroup END
 " }}}
