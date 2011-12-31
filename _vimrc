@@ -81,13 +81,13 @@ set fileencodings=iso-2022-jp,euc-jp,utf-8,cp932
 let quickrun_config = {}
 
 let quickrun_config._ = {
-			\ 'runner': 'vimproc',
-			\ 'runner/vimproc/updatetime': 100,
-			\ 'outputter': 'error',
-			\ 'outputter/buffer/split': 'rightb 8sp',
-			\ 'outputter/error/error': 'quickfix',
-			\ 'cmdopt': '%{b:cmdopt}',
-			\ 'args': '%{b:args}',
+			\ 'runner'		: 'vimproc',
+			\ 'outputter'	: 'error',
+			\ 'cmdopt'		: '%{b:cmdopt}',
+			\ 'args'			: '%{b:args}',
+			\ 'runner/vimproc/updatetime'	: 100,
+			\ 'outputter/buffer/split'		: 'rightb 8sp',
+			\ 'outputter/error/error'			: 'quickfix',
 			\ }
 
 " outputter mixed {{{
@@ -108,11 +108,11 @@ call quickrun#register_outputter('mixed', quickrun_mixed)
 " }}}
 
 let quickrun_config.tct = {
-			\ 'exec': ['%c %o %s %a',
+			\ 'exec'			: ['%c %o %s %a',
 			\ 'qemu-system-tct -nographic -kernel a.out 2>&1'],
-			\ 'command': 'tct-elf-gcc',
-			\ 'cmdopt': expand('-T $tct_dir/tct.ld $tct_dir/opc/crt0.s'),
-			\ 'outputter': 'mixed',
+			\ 'command'		: 'tct-elf-gcc',
+			\ 'cmdopt'		: expand('-T $tct_dir/tct.ld $tct_dir/opc/crt0.s'),
+			\ 'outputter'	: 'mixed',
 			\ }
 
 let quickrun_config['c.tct'] = quickrun_config.tct
@@ -126,7 +126,14 @@ let $viminfo = $dotvim . '/_viminfo'
 set viminfo=!,%,'1024,c,h,n$viminfo
 
 " undo
-set undolevels=1024
+let &undolevels = 1024 * 1024
+
+" Feature: persistent_undo {{{
+if has('persistent_undo')
+	let &undodir = $dotvim . '/.undo'
+	set undofile
+endif
+" }}}
 
 " swap
 set swapfile
@@ -234,7 +241,7 @@ if has('cscope')
 
 			if filereadable(g:cscope_file)
 				let g:cscope_dir = dir
-				exe "cscope add " . g:cscope_file . " " . g:cscope_dir
+				exe 'cscope add ' . g:cscope_file . ' ' . g:cscope_dir
 				return g:cscope_file
 			endif
 
@@ -274,10 +281,10 @@ function! FindBuild(dir)
 	let dir = expand(a:dir)
 
 	while dir != '/' && stridx(dir, '/') != -1
-		let tmp = dir . '/build'
+		let build = dir . '/build'
 
-		if isdirectory(tmp)
-			return tmp
+		if isdirectory(build)
+			return build
 		endif
 
 		let dir = fnamemodify(dir, ':h')
@@ -337,16 +344,16 @@ vnoremap > >gv
 nnoremap <expr> gV '`[' . strpart(getregtype(), 0, 1) . '`]'
 
 " substitution
-nnoremap ss s
-nnoremap se ce<C-r>0<ESC>
-nnoremap sE cE<C-r>0<ESC>
-nnoremap sw ciw<C-r>0<ESC>
-nnoremap sW ciW<C-r>0<ESC>
-nnoremap sC C<c-r>0<ESC>
-nnoremap sS S<C-r>0<ESC>
-nnoremap sp S<C-r>0<ESC>
-vnoremap ss s
-vnoremap sp c<C-r>0<ESC>
+nnoremap ss		s
+nnoremap se		ce<C-r>0<ESC>
+nnoremap sE		cE<C-r>0<ESC>
+nnoremap siw	ciw<C-r>0<ESC>
+nnoremap siW	ciW<C-r>0<ESC>
+nnoremap sC		C<c-r>0<ESC>
+nnoremap sS		S<C-r>0<ESC>
+nnoremap sp		S<C-r>0<ESC>
+vnoremap ss		s
+vnoremap sp		c<C-r>0<ESC>
 
 " expand
 inoremap <expr> <C-r>:p expand('%')
@@ -359,6 +366,17 @@ nnoremap <Leader>vbi :NeoBundleInstall<CR>
 nnoremap <Leader>vbc :NeoBundleClean<CR>
 nnoremap <Leader>vbd :NeoBundleDocs<CR>
 nnoremap <Leader>vbl :NeoBundleList<CR>
+" }}}
+
+" Map: unite {{{
+nnoremap <Leader>u		:Unite 
+nnoremap <Leader>ut		:Unite tag<CR>
+nnoremap <Leader>utt	:Unite tag<CR>
+nnoremap <Leader>utf	:Unite tag/file<CR>
+nnoremap <Leader>ur		:Unite ref 
+nnoremap <Leader>urm	:Unite ref/man<CR>
+nnoremap <Leader>urpl :Unite ref/perldoc<CR>
+nnoremap <Leader>urpy :Unite ref/pydoc<CR>
 " }}}
 
 " Map: fugitive {{{
