@@ -118,7 +118,7 @@ let quickrun_config = {}
 
 let quickrun_config._ = {
 			\ 'runner'		: 'vimproc',
-			\ 'outputter'	: 'error',
+			\ 'outputter'	: 'buffer',
 			\ 'cmdopt'		: '%{b:cmdopt}',
 			\ 'args'			: '%{b:args}',
 			\ 'runner/vimproc/updatetime'	: 100,
@@ -143,6 +143,11 @@ endfunction
 call quickrun#register_outputter('mixed', quickrun_mixed)
 " }}}
 
+let quickrun_config.scheme = {
+			\ 'command'		: 'gosh',
+			\ 'outputter'	: 'buffer',
+			\ }
+
 let quickrun_config.tct = {
 			\ 'exec'			: ['%c %o %s %a',
 			\ 'qemu-system-tct -nographic -kernel a.out 2>&1'],
@@ -153,6 +158,52 @@ let quickrun_config.tct = {
 
 let quickrun_config['c.tct'] = quickrun_config.tct
 let quickrun_config['asm.tct'] = quickrun_config.tct
+" }}}
+
+" Plugin: Pyclewn {{{
+let gdb_i386 = 'gdb'
+let gdb_arm = 'arm-linux-gnueabi-gdb'
+
+" Function: SetPyclewnArgs() {{{
+function! SetPyclewnArgs(gdb, project)
+	let g:pyclewn_gdb = a:gdb
+	let g:pyclewn_args =
+				\ '--gdb=async,' . a:project
+				\ . ' --pgm=' . g:pyclewn_gdb
+				\ . ' --window=top'
+				\ . ' --maxlines=' . 1024 * 1024
+				\ . ' --background=Cyan,Green,Magenta'
+endfunction
+" }}}
+
+" Function: ToggleCmapkeys {{{
+function! ToggleCmapkeys(gdb, project)
+	if !has('netbeans_enabled')
+		call SetPyclewnArgs(a:gdb, a:project)
+		Pyclewn
+		let g:pyclewn_mapped = 1 | Cmapkeys
+	else
+		if a:gdb != g:pyclewn_gdb || a:project != ''
+			unlet g:pyclewn_mapped | nbclose
+			call ToggleCmapkeys(a:gdb, a:project)
+		else
+			if g:pyclewn_mapped
+				echo ':Cunmapkeys'
+				let g:pyclewn_mapped = 0 | Cunmapkeys
+			else
+				echo ':Cmapkeys'
+				let g:pyclewn_mapped = 1 | Cmapkeys
+			endif
+		endif
+	endif
+endfunction
+" }}}
+
+" Command: Cargs {{{
+command! -nargs=? -complete=file Ci386 call ToggleCmapkeys(gdb_i386, '<args>')
+command! -nargs=? -complete=file Carm call ToggleCmapkeys(gdb_arm, '<args>')
+command! -nargs=* -complete=file Cargs Cset args <args>
+" }}}
 " }}}
 " }}}
 
@@ -218,6 +269,10 @@ set number
 set textwidth=0
 set backspace=indent,eol,start
 
+" tab
+set tabstop=4
+set shiftwidth=4
+
 " Plugin: indent-guides {{{
 " <Leader>ig => enable / disable
 " let indent_guides_enable_on_vim_startup = 1
@@ -264,7 +319,7 @@ let Errormaker_warninggroup = 'Todo'
 " }}}
 
 " Option: search {{{
-set hlsearch
+set hlsearch | :nohlsearch
 set incsearch
 set ignorecase
 set smartcase
@@ -411,15 +466,16 @@ nnoremap <Leader>vbl :NeoBundleList<CR>
 
 " Map: unite {{{
 nnoremap <Leader>u		:Unite 
+nnoremap <Leader>uf		:Unite file<CR>
 nnoremap <Leader>ut		:Unite tag<CR>
 nnoremap <Leader>utt	:Unite tag<CR>
 nnoremap <Leader>utf	:Unite tag/file<CR>
 nnoremap <Leader>ur		:Unite ref 
 nnoremap <Leader>urm	:Unite ref/man<CR>
-nnoremap <Leader>urpl :Unite ref/perldoc<CR>
-nnoremap <Leader>urpy :Unite ref/pydoc<CR>
-nnoremap <Leader>uv		:Unite scriptnames<CR>
+nnoremap <Leader>urpl	:Unite ref/perldoc<CR>
+nnoremap <Leader>urpy	:Unite ref/pydoc<CR>
 nnoremap <Leader>us		:Unite snippet<CR>
+nnoremap <Leader>uv		:Unite scriptnames<CR>
 " }}}
 
 " Map: fugitive {{{
@@ -431,6 +487,20 @@ nnoremap <Leader>gd :Gdiff<CR>
 
 " Map: quickrun {{{
 map <Leader>r :QuickRun<CR>
+" }}}
+
+" Map: Pyclewn {{{
+nnoremap <Leader>c	:Ci386<CR>
+nnoremap <Leader>cI	:Ci386<CR>
+nnoremap <Leader>cA	:Carm<CR>
+nnoremap <Leader>cS	:Csymcompletion<CR>
+nnoremap <Leader>cP :Cproject <C-r>=strftime('%y%m%d')<CR>.gdb
+nnoremap <Leader>cq	:nbclose<CR>:bdelete (clewn)_console<CR>
+nnoremap <Leader>cs	:Csigint<CR>
+nnoremap <Leader>cp	:Cprint 
+nnoremap <Leader>cb	:Cbreak 
+vnoremap <Leader>cp "*y:<C-u>Cprint <C-r>*<CR>
+vnoremap <Leader>cb "*y:<C-u>Cbreak <C-r>*<CR>
 " }}}
 
 " Map: EasyMotion {{{
@@ -468,10 +538,10 @@ if has('cscope')
 endif
 " }}}
 
-" Map: smartchr {{{
-inoremap <expr> = smartchr#loop(' = ', '=', ' == ')
-inoremap <expr> , smartchr#one_of(', ', ',')
-" }}}
+" " Map: smartchr {{{
+" inoremap <expr> = smartchr#loop(' = ', '=', ' == ')
+" inoremap <expr> , smartchr#one_of(', ', ',')
+" " }}}
 
 " Map: neocomplcache {{{
 nnoremap <Leader>ns :NecoSnip 
@@ -484,6 +554,7 @@ smap <C-k> <Plug>(neocomplcache_snippets_expand)
 augroup noname
 	autocmd!
 	autocmd VimEnter * cmap <C-w> <M-BS>
+	autocmd VimEnter *.snip setlocal filetype=snippet
 	" autocmd BufEnter * lcd %:p:h
 	autocmd BufReadPost ~/dev/linux-stable/*
 				\	set path^=~/dev/linux-stable/include
@@ -498,9 +569,9 @@ augroup END
 augroup filetype
 	autocmd!
 	autocmd FileType * setlocal formatoptions-=ro
-	" autocmd FileType * setlocal ts=4 sw=4 fdm=marker
-	" autocmd FileType vim setlocal ts=2 sw=2 fdm=marker
 	autocmd FileType help nnoremap <buffer> q <C-w>c
+	autocmd FileType xml nnoremap <Leader>vf :%!xmllint --format -<CR>
+	autocmd FileTYpe xml vnoremap <Leader>vf :!xmllint --format -<CR>
 augroup END
 " }}}
 
