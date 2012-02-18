@@ -40,6 +40,7 @@ NeoBundle 'Shougo/clang_complete'
 NeoBundle 'Shougo/echodoc'
 NeoBundle 'Shougo/neobundle.vim'
 NeoBundle 'Shougo/neocomplcache'
+NeoBundle 'Shougo/neocomplcache-snippets-complete'
 NeoBundle 'Shougo/unite.vim'
 NeoBundle 'Shougo/vimfiler'
 NeoBundle 'Shougo/vimproc'
@@ -51,9 +52,12 @@ NeoBundle 'thinca/vim-ref'
 NeoBundle 'thinca/vim-visualstar'
 NeoBundle 'tomtom/tcomment_vim'
 NeoBundle 'tpope/vim-abolish'
+NeoBundle 'tpope/vim-commentary'
 NeoBundle 'tpope/vim-fugitive'
+NeoBundle 'tpope/vim-repeat'
 NeoBundle 'tpope/vim-speeddating'
 NeoBundle 'tpope/vim-surround'
+NeoBundle 'tpope/vim-unimpaired'
 NeoBundle 'tsukkee/unite-tag'
 NeoBundle 'vim-jp/vimdoc-ja'
 NeoBundle 'vim-scripts/ShowMarks'
@@ -61,7 +65,6 @@ NeoBundle 'zhaocai/unite-scriptnames'
 " }}}
 
 " @ vim-scripts {{{
-" NeoBundle 'autodate.vim'
 NeoBundle 'DirDiff.vim'
 NeoBundle 'errormarker.vim'
 NeoBundle 'sudo.vim'
@@ -369,17 +372,40 @@ set wildmode=longest,list,full
 set showfulltag
 set completeopt=longest,menuone,preview
 
-" " Plugin: autodate.vim {{{
-" let autodate_keyword_pre = 'Update:'
-" let autodate_keyword_post = '.'
-" let autodate_format = '%y/%m/%d %T'
-" " }}}
-
 " Plugin: necomplcache {{{
 let neocomplcache_enable_at_startup = 1
 let neocomplcache_temporary_dir = $dotvim . '/.neocon'
 let neocomplcache_snippets_dir = $dotvim . '/snip'
+let neocomplcache_min_syntax_length = 3
+let neocomplcache_enable_smart_case = 1
+let neocomplcache_enable_camel_case_completion = 1
 let neocomplcache_enable_underbar_completion = 1
+
+" dictionaries {{{
+let g:neocomplcache_dictionary_filetype_lists = {
+			\ 'default'		: '',
+			\ 'vimshell'	: '~/.zsh_history',
+			\ }
+" }}}
+
+" keyword patterns {{{
+if !exists('g:neocomplcache_keyword_patterns')
+	let g:neocomplcache_keyword_patterns = {}
+endif
+
+let g:neocomplcache_keyword_patterns['default'] = '\h\w*'
+" }}}
+
+" " omni patterns {{{
+" if !exists('g:neocomplcache_omni_patterns')
+" 	let g:neocomplcache_omni_patterns = {}
+" endif
+" 
+" let g:neocomplcache_omni_patterns.c = '\%(\.\|->\)\h\w*'
+" let g:neocomplcache_omni_patterns.cpp = '\h\w*\%(\.\|->\)\h\w*\|\h\w*::'
+" let g:neocomplcache_omni_patterns.php = '[^. \t]->\h\w*\|\h\w*::'
+" let g:neocomplcache_omni_patterns.ruby = '[^. *\t]\.\w*\|\h\w*::'
+" " }}}
 
 " Command: neocomplcache {{{
 command! -nargs=* NecoSnip NeoComplCacheEditSnippets <args>
@@ -548,6 +574,14 @@ nnoremap <Leader>ns :NecoSnip
 nnoremap <Leader>nS :NecoRSnip 
 imap <C-k> <Plug>(neocomplcache_snippets_expand)
 smap <C-k> <Plug>(neocomplcache_snippets_expand)
+inoremap <expr> <C-g> neocomplcache#undo_completion()
+inoremap <expr> <C-l> neocomplcache#complete_common_string()
+" inoremap <expr> <CR> neocomplcache#smart_close_popup() . "\<CR>"
+inoremap <expr> <Tab> pumvisible() ? "\<C-n>" : "\<Tab>"
+inoremap <expr> <C-h> neocomplcache#smart_close_popup() . "\<C-h>"
+inoremap <expr> <C-h> neocomplcache#smart_close_popup() . "\<C-h>"
+inoremap <expr> <C-y> pumvisible() ? neocomplcache#close_popup() : "\<C-y>"
+inoremap <expr> <C-e> pumvisible() ? neocomplcache#cancel_popup() : "\<C-e>"
 " }}}
 
 " Autocmd: {{{
@@ -578,6 +612,17 @@ augroup END
 " Autocmd: nasty space {{{
 highlight nasty_space ctermbg=RED
 autocmd VimEnter,WinEnter * match nasty_space /　\|\s\+$/
+" }}}
+
+" Autocmd: neocomplcache {{{
+augroup neocomplcache
+	autocmd FileType css setlocal omnifunc=csscomplete#CompleteCSS
+	autocmd FileType html,markdown setlocal omnifunc=htmlcomplete#CompleteTags
+	autocmd FileType javascript setlocal omnifunc=javascriptcomplete#CompleteJS
+	autocmd FileType python setlocal omnifunc=pythoncomplete#Complete
+	autocmd FileType ruby setlocal omnifunc=rubycomplete#Complete
+	autocmd FileType xml setlocal omnifunc=xmlcomplete#CompleteTagsinoremap
+augroup END
 " }}}
 
 " vim: ts=2 sw=2 fdm=marker
