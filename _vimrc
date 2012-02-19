@@ -11,7 +11,8 @@ filetype off
 " Script: dotvim {{{
 if has('win32') || has('win64')
 	let $osname = 'Windows'
-	let $dotvim = expand('~/vimfiles')
+"	let $dotvim = expand('~/vimfiles')
+	let $dotvim = expand('~/.vim')
 else
 	let $osname = system('uname')
 	let $dotvim = expand('~/.vim')
@@ -76,9 +77,13 @@ filetype plugin on
 filetype indent on
 
 " Option: env {{{
-set path=.,,/usr/local/include,/usr/include,./include
-let $tmp_dirs = '~/tmp,/var/tmp,/tmp'
-let $tct_dir = '~/dev/scqemu/test/tct'
+if has('win32') || has('win64')
+	let $tmp_dirs = $TEMP
+else
+	set path=.,,/usr/local/include,/usr/include,./include
+	let $tmp_dirs = '~/tmp,/var/tmp,/tmp'
+	let $tct_dir = '~/dev/scqemu/test/tct'
+endif
 
 " language and encoding
 set helplang=en,ja

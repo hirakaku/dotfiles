@@ -1,4 +1,2 @@
+vimfiles/.*
 vimfiles/bundle
-vimfiles/.neocon
-vimfiles/.undo
-vimfiles/_viminfo
