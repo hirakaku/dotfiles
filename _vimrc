@@ -1,22 +1,14 @@
 " File:			dotfiles/_vimrc
 " Author:		hirakaku <hirakaku@gmail.com>
-" Version:	v0.1c
+" Version:	v0.2
 
 set nocompatible
-colorscheme elflord
 
 " Plugin: neobundle {{{
 filetype off
 
 " Script: dotvim {{{
-if has('win32') || has('win64')
-	let $osname = 'Windows'
-"	let $dotvim = expand('~/vimfiles')
-	let $dotvim = expand('~/.vim')
-else
-	let $osname = system('uname')
-	let $dotvim = expand('~/.vim')
-endif
+let $dotvim = expand('~/.vim')
 
 if has('vim_starting')
 	" git clone neobundle here!
@@ -37,7 +29,6 @@ NeoBundle 'kana/vim-textobj-lastpat'
 NeoBundle 'kana/vim-textobj-user'
 NeoBundle 'Lokaltog/vim-easymotion'
 NeoBundle 'nathanaelkane/vim-indent-guides'
-NeoBundle 'Shougo/clang_complete'
 NeoBundle 'Shougo/echodoc'
 NeoBundle 'Shougo/neobundle.vim'
 NeoBundle 'Shougo/neocomplcache'
@@ -77,13 +68,21 @@ filetype plugin on
 filetype indent on
 
 " Option: env {{{
+" Option: os {{{
 if has('win32') || has('win64')
-	let $tmp_dirs = $TEMP
+	let $osname = 'Windows'
+	let $dotfiles = $HOMEPATH . '/Dropbox/dotfiles'
+	let $tmpdirs = $TEMP
 else
+	colorscheme elflord
 	set path=.,,/usr/local/include,/usr/include,./include
-	let $tmp_dirs = '~/tmp,/var/tmp,/tmp'
-	let $tct_dir = '~/dev/scqemu/test/tct'
+
+	let $osname = system('uname')
+	let $dotfiles = '~/dotfiles'
+	let $tmpdirs = '~/tmp,/var/tmp,/tmp'
+	let $tctdir = '~/dev/scqemu/test/tct'
 endif
+" }}}
 
 " language and encoding
 set helplang=en,ja
@@ -92,6 +91,14 @@ set fileencodings=iso-2022-jp,euc-jp,utf-8,cp932
 " Command: H {{{
 command! -nargs=? -complete=help H
 			\ h <args> | normal <C-w>L
+" }}}
+
+" Plugin: vimfiler {{{
+let vimfiler_data_directory = $tmpdirs . '/.vimfiler'
+" }}}
+
+" Plugin: vimshell {{{
+let vimshell_temporary_directory = $tmpdirs . '/.vimshell'
 " }}}
 
 " Command: Make {{{
@@ -160,7 +167,7 @@ let quickrun_config.tct = {
 			\ 'exec'			: ['%c %o %s %a',
 			\ 'qemu-system-tct -nographic -kernel a.out 2>&1'],
 			\ 'command'		: 'tct-elf-gcc',
-			\ 'cmdopt'		: expand('-T $tct_dir/tct.ld $tct_dir/opc/crt0.s'),
+			\ 'cmdopt'		: expand('-T $tctdir/tct.ld $tctdir/opc/crt0.s'),
 			\ 'outputter'	: 'mixed',
 			\ }
 
@@ -217,7 +224,7 @@ command! -nargs=* -complete=file Cargs Cset args <args>
 
 " Option: history {{{
 let &history = 1024 * 1024
-let $viminfo = $dotvim . '/_viminfo'
+let $viminfo = $dotvim . '/.viminfo'
 set viminfo=!,%,'1024,c,h,n$viminfo
 
 " undo
@@ -232,7 +239,11 @@ endif
 
 " swap
 set swapfile
-set directory=$tmp_dirs
+set directory=$tmpdirs
+
+" backup
+set backup
+set backupdir=$tmpdirs
 
 " Plugin: poslist {{{
 let poslist_histsize = 1024 * 1024
@@ -301,8 +312,8 @@ runtime macros/matchit.vim
 let yankring_max_history = 16
 let yankring_window_height = 11
 let yankring_manage_numbered_reg = 1
-let yankring_history_dir = expand('~/')
-let yankring_history_file = '.vim_yankring'
+let yankring_history_dir = $dotvim
+let yankring_history_file = '.yankring'
 " }}}
 " }}}
 
@@ -379,7 +390,7 @@ set completeopt=longest,menuone,preview
 
 " Plugin: necomplcache {{{
 let neocomplcache_enable_at_startup = 1
-let neocomplcache_temporary_dir = $dotvim . '/.neocon'
+let neocomplcache_temporary_dir = $dotvim . '/.neco'
 let neocomplcache_snippets_dir = $dotvim . '/snip'
 let neocomplcache_min_syntax_length = 3
 let neocomplcache_enable_smart_case = 1
@@ -432,14 +443,20 @@ nnoremap <Leader>:t :tabe %:h/
 
 nnoremap <Leader>vc :Calc<CR>
 nnoremap <Leader>vf :VimFiler<CR>
+nnoremap <Leader>vF :FullScreen<CR>
 nnoremap <Leader>vm :Make 
 nnoremap <Leader>vs :w !sh<CR>
 nnoremap <Leader>vw :w sudo:%
 
 " vimrc
-nnoremap <Leader>v	:e ~/.vimrc<CR>
-nnoremap <Leader>vv	:vnew ~/.vimrc<CR><C-w>L
-nnoremap <Leader>vV	:tabe ~/.vimrc<CR>
+let $vimrc = $dotfiles . '/_vimrc'
+let $gvimrc = $dotfiles . '/_gvimrc'
+
+nnoremap <Leader>v	:e $vimrc<CR>
+nnoremap <Leader>vv	:vnew $vimrc<CR><C-w>L
+nnoremap <Leader>vV	:tabe $vimrc<CR>
+nnoremap <Leader>vg :vnew $gvimrc<CR>
+nnoremap <Leader>vG :tabe $gvimrc<CR>
 nnoremap <Leader>V	:so %<CR>
 
 " scratch buffer
@@ -630,4 +647,4 @@ augroup neocomplcache
 augroup END
 " }}}
 
-" vim: ts=2 sw=2 fdm=marker
+" vim: ts=2 sw=2 fenc=utf-8 ff=unix fdm=marker

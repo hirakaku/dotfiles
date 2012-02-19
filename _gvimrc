@@ -1,1 +1,8 @@
+" File:			dotfiles/_gvimrc
+" Author:		hirakaku <hirakaku@gmail.com>
+" Version:	v0.1
+
 colorscheme desert
+set guioptions=
+
+" vim: ts=2 sw=2 fenc=utf-8 ff=unix fdm=marker
