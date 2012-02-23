@@ -1,6 +1,6 @@
 " File:			dotfiles/_vimrc
 " Author:		hirakaku <hirakaku@gmail.com>
-" Version:	v0.2
+" Version:	v0.2a
 
 set nocompatible
 
@@ -71,7 +71,7 @@ filetype indent on
 " Option: os {{{
 if has('win32') || has('win64')
 	let $osname = 'Windows'
-	let $dotfiles = $HOMEPATH . '/Dropbox/dotfiles'
+	let $dotfiles = $HOME . '/dotfiles'
 	let $tmpdirs = $TEMP
 else
 	colorscheme elflord
@@ -86,7 +86,12 @@ endif
 
 " language and encoding
 set helplang=en,ja
-set fileencodings=iso-2022-jp,euc-jp,utf-8,cp932
+set fileencodings=ucs-bom,utf-8,euc-jp,iso-2022-jp,cp932
+set fileformats=unix,mac,dos
+
+" input method
+set iminsert=0
+set imsearch=0
 
 " Command: H {{{
 command! -nargs=? -complete=help H
@@ -99,33 +104,6 @@ let vimfiler_data_directory = $tmpdirs . '/.vimfiler'
 
 " Plugin: vimshell {{{
 let vimshell_temporary_directory = $tmpdirs . '/.vimshell'
-" }}}
-
-" Command: Make {{{
-" Function: FindBuild() {{{
-function! FindBuild(dir)
-	let dir = expand(a:dir)
-
-	while dir != '/' && stridx(dir, '/') != -1
-		let build = dir . '/build'
-
-		if isdirectory(build)
-			return build
-		endif
-
-		let dir = fnamemodify(dir, ':h')
-	endwhile
-
-	return ''
-endfunction
-" }}}
-
-command! -nargs=? Make
-			\ let b:build_dir = FindBuild(getcwd()) |
-			\ | if b:build_dir != ''
-				\ | echo b:build_dir
-				\ | exe 'make -C ' . b:build_dir . ' <args>'
-				\ | endif
 " }}}
 
 " Plugin: quickrun {{{
@@ -173,6 +151,131 @@ let quickrun_config.tct = {
 
 let quickrun_config['c.tct'] = quickrun_config.tct
 let quickrun_config['asm.tct'] = quickrun_config.tct
+" }}}
+
+" Command: Call, Hook {{{
+" Function: GetSIDs() {{{
+function! GetSIDs(file)
+	let file = empty(a:file) ? expand('%:p') : a:file
+
+	redir => scriptnames
+	silent! scriptnames
+	redir END
+
+	let sids = []
+	let spat = '\v\s*(\d+):\s*(.*)$'
+	let fpat = '\V'
+				\ . substitute(file, '\\', '/', 'g')
+				\ . '\v%(\.vim)?$'
+
+	for s in split(scriptnames, "\n")
+		let m = matchlist(s, spat)
+
+		if empty(m) | continue | endif
+
+		let [sid, script] = m[1 : 2]
+		let script = fnamemodify(script, ':p:gs?\\?/?')
+
+		if script =~# fpat
+			call add(sids, sid)
+		endif
+	endfor
+
+	return sids
+endfunction
+" }}}
+
+" Function: GetFunction() {{{
+function! GetFunction(file, fnname)
+	let sid = get(GetSIDs(a:file), 0, '')
+	return function('<SNR>' . sid . '_' . a:fnname)
+endfunction
+" }}}
+
+" Function: Call() {{{
+function! Call(f, ...)
+	let [file, fnname] = (a:f =~# ':') ? split(a:f, ':') : [expand('%:p'), a:f]
+	let sids = GetSIDs(file)
+
+	for sid in sids
+		if exists('*<SNR>' . sid . '_' . fnname)
+			let fn = '<SNR>' . sid . '_' . fnname
+			return call(fn, a:000)
+		endif
+	endfor
+
+	echoerr 'Failed to call script local function: ' . a:f
+	return -1
+endfunction
+" }}}
+
+" Function: Hook() {{{
+function! Hook(hooked, fn)
+	let fnpat = "^function('\\(.*\\)')$"
+	let hooked = (type(a:hooked) == 2)
+				\ ? substitute(string(a:hooked), fnpat, '\1', '')
+				\ : a:hooked
+	let fn = (type(a:fn) == 2)
+				\ ? substitute(string(a:fn), fnpat, '\1', '')
+				\ : a:fn
+
+	exe printf("function! %s(...)\n"
+				\ . "\treturn call('%s', a:000)\n"
+				\ . "endfunction",
+				\ hooked, fn)
+endfunction
+" }}}
+
+command! -nargs=+ Call echo Call(<f-args>)
+command! -nargs=+ Hook call Hook(<f-args>)
+
+" Test: :Call {{{
+" :echo GetSIDs('')
+" :let F = GetFunction('', 'Test') | echo F(0) => 1
+" :Call Test 0 => 1
+function! s:Test(nr)
+	return a:nr + 1
+endfunction
+" }}}
+
+" Test: :Hook {{{
+" :Hook A B
+" :call A() => Hello, B!
+function! A()
+	echo "Hello, A!"
+endfunction
+
+function! B()
+	echo "Hello, B!"
+endfunction
+" }}}
+" }}}
+
+" Command: Make {{{
+" Function: FindBuild() {{{
+function! FindBuild(dir)
+	let dir = expand(a:dir)
+
+	while dir != '/' && stridx(dir, '/') != -1
+		let build = dir . '/build'
+
+		if isdirectory(build)
+			return build
+		endif
+
+		let dir = fnamemodify(dir, ':h')
+	endwhile
+
+	return ''
+endfunction
+" }}}
+
+command! -nargs=? Make
+			\ let b:build_dir = FindBuild(getcwd()) |
+			\ | if b:build_dir != ''
+				\ | echo b:build_dir
+				\ | exe 'make -C ' . b:build_dir . ' <args>'
+				\ | endif
 " }}}
 
 " Plugin: Pyclewn {{{
@@ -287,10 +390,6 @@ endfunction
 set number
 set textwidth=0
 set backspace=indent,eol,start
-
-" tab
-set tabstop=4
-set shiftwidth=4
 
 " Plugin: indent-guides {{{
 " <Leader>ig => enable / disable
@@ -436,6 +535,8 @@ let mapleader = ','
 nnoremap j gj
 nnoremap k gk
 
+inoremap <Esc> <Esc>:set iminsert=0<CR>
+
 nnoremap <Leader>:e :e %:h/
 nnoremap <Leader>:n :new %:h/
 nnoremap <Leader>:v :vnew %:h/
@@ -451,12 +552,15 @@ nnoremap <Leader>vw :w sudo:%
 " vimrc
 let $vimrc = $dotfiles . '/_vimrc'
 let $gvimrc = $dotfiles . '/_gvimrc'
+let $nodokarc = $dotfiles . '/dot.nodoka'
 
 nnoremap <Leader>v	:e $vimrc<CR>
 nnoremap <Leader>vv	:vnew $vimrc<CR><C-w>L
 nnoremap <Leader>vV	:tabe $vimrc<CR>
 nnoremap <Leader>vg :vnew $gvimrc<CR>
 nnoremap <Leader>vG :tabe $gvimrc<CR>
+nnoremap <Leader>vn :vnew $nodokarc<CR>
+nnoremap <Leader>vN :tabe $nodokarc<CR>
 nnoremap <Leader>V	:so %<CR>
 
 " scratch buffer
@@ -606,12 +710,13 @@ inoremap <expr> <C-y> pumvisible() ? neocomplcache#close_popup() : "\<C-y>"
 inoremap <expr> <C-e> pumvisible() ? neocomplcache#cancel_popup() : "\<C-e>"
 " }}}
 
-" Autocmd: {{{
+" Augroup: {{{
 augroup noname
 	autocmd!
+	autocmd VimEnter * set ts=4 sw=4 fenc=utf-8 ff=unix nomod
+	autocmd BufNewFile,BufReadPost * setlocal ts=4 sw=4
 	autocmd VimEnter * cmap <C-w> <M-BS>
 	autocmd VimEnter *.snip setlocal filetype=snippet
-	" autocmd BufEnter * lcd %:p:h
 	autocmd BufReadPost ~/dev/linux-stable/*
 				\	set path^=~/dev/linux-stable/include
 	autocmd BufReadPost *
@@ -621,7 +726,7 @@ augroup noname
 augroup END
 " }}}
 
-" Autocmd: FileType {{{
+" Augroup: filetype {{{
 augroup filetype
 	autocmd!
 	autocmd FileType * setlocal formatoptions-=ro
@@ -632,12 +737,13 @@ augroup END
 " }}}
 
 " Autocmd: nasty space {{{
-highlight nasty_space ctermbg=RED
-autocmd VimEnter,WinEnter * match nasty_space /　\|\s\+$/
+highlight nasty_space ctermbg=Red guibg=Red
+autocmd VimEnter,WinEnter * match nasty_space /　\|\s\+$/ 
 " }}}
 
-" Autocmd: neocomplcache {{{
+" Augroup: neocomplcache {{{
 augroup neocomplcache
+	autocmd!
 	autocmd FileType css setlocal omnifunc=csscomplete#CompleteCSS
 	autocmd FileType html,markdown setlocal omnifunc=htmlcomplete#CompleteTags
 	autocmd FileType javascript setlocal omnifunc=javascriptcomplete#CompleteJS
@@ -647,4 +753,4 @@ augroup neocomplcache
 augroup END
 " }}}
 
-" vim: ts=2 sw=2 fenc=utf-8 ff=unix fdm=marker
+" vim: ts=2 sw=2 fenc=utf-8 ff=unix fdm=marker:

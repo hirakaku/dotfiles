@@ -5,4 +5,8 @@
 colorscheme desert
 set guioptions=
 
-" vim: ts=2 sw=2 fenc=utf-8 ff=unix fdm=marker
+" window size
+set columns=120
+set lines=32
+
+" vim: ts=2 sw=2 ff=unix fdm=marker:
