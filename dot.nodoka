@@ -1,100 +1,102 @@
-# File:		dot.nodoka
+# File:		$dotfiles/dot.nodoka
 # Author:	hirakaku
-# Version:	v0.1
 
 # $ProgramW6432/nodoka/109.nodoka
 include "109.nodoka"
 
-# option {{{
-def option FocusChange = enable
-def option mouse-event = true
-def option drag-threshold = 30
-def option delay-of !!! = 30
+# options {{{
+def option UseTSF			= false
+def option FocusChange		= enable
+def option mouse-event		= true
+def option drag-threshold	= 30
+def option delay-of !!!		= 30
 # }}}
 
 keymap global # {{{
-# mod {{{
+# mods {{{
 mod Shift += !!Space
-mod Mod0 = !Eisuu
+mod Mod0 = !!Eisuu
 mod Mod1 = !!NonConvert
 mod Mod2 = !!Convert
 mod Mod3 = !!Hiragana
 mod Mod4 = !!Colon
+
+key *Eisuu		= &Ignore
+key *Convert	= &Ignore
+key *NonConvert	= &Ignore
+key *Hiragana	= &Ignore
+key *Hiragana	= &Ignore
 # }}}
 
 # nodoka {{{
-key M0-F5 = &LoadSetting("home") &HelpMessage("nodoka", "reload setting\n~/dot.nodoka")
-key M0-F6 = &DescribeBindings &NodokaDialog(Log, SHOW)
-key M0-F7 = &WindowIdentify &NodokaDialog(Log, SHOW)
-key M0-F8 = &InvestigateCommand &NodokaDialog(Log, SHOWNA)
+key M0-F5 = &HelpMessage("nodoka", "reload setting\ndotfiles") \
+	&LoadSetting("dotfiles")
+
+key M0-F6 = &HelpMessage("nodoka", "show log") \
+	&SendPostMessage(PostTray,, "‚Ì‚Ç‚©", 0x205, 0x0, 0x0)
+
+key M0-F7 = &HelpMessage("nodoka", "show binds") \
+	&DescribeBindings \
+	&NodokaDialog(Log, SHOWNA)
+
+key M0-F8 = &HelpMessage("nodoka", "show info") \
+	&WindowIdentify \
+	&NodokaDialog(Log, SHOWNA)
+
+key M0-F9 = &HelpMessage("nodoka", "show messages") \
+	&InvestigateCommand \
+	&NodokaDialog(Log, SHOWNA)
 # }}}
 
 # common {{{
-# IM {{{
-key *Convert	= &Ignore
-key *NonConvert	= &Ignore
+# prefix {{{
+key M0-U-Eisuu = &CancelPrefix &HelpMessage
+# }}}
 
-key ~IL-*Convert		= $ToggleIME
-key IL-~IC-*NonConvert	= $ToggleIME
-key IL-IC-*NonConvert	= S-Esc &Sync $ToggleIME
+# input method {{{
+key ~IL-*Convert		= &SetImeStatus(on)
+key IL-~IC-*NonConvert	= &SetImeStatus(off)
+key IL-IC-*NonConvert	= S-Esc &Sync &SetImeStatus(off)
 # }}}
 
 # semicolon-enter {{{
-key *Semicolon			= Enter
-key *IC-S-Semicolon		= &Default
-key *IC-M0-M-Semicolon	= Semicolon
+key *IC-Semicolon		= Enter
+key *IC-M0-*Semicolon	= Semicolon
 # }}}
 
-# vim-like {{{
-key *IC-M0-OpenBracket = Esc
-
-key *IC-M0-*S-n = *S-Space
-key *IC-M0-*S-m = *S-Enter
-key *IC-M0-*S-p = *S-BackSpace
-key *IC-M0-M-p = Delete
-
-key *IC-M0-*S-h = *S-Left
-key *IC-M0-*S-j = *S-Down
-key *IC-M0-*S-k = *S-Up
-key *IC-M0-*S-l = *S-Right
-
-key *IC-M0-M1-*S-j = *S-PageDown
-key *IC-M0-M1-*S-k = *S-PageUp
-# }}}
-
-# emacs-like {{{
-key *IC-M0-*S-a = *S-Home
-key *IC-M0-*S-e = *S-End
-# }}}
-
-# alt-shift {{{
-key *IC-M0-M-h = S-Left
-key *IC-M0-M-j = S-Down
-key *IC-M0-M-k = S-Up
-key *IC-M0-M-l = S-Right
-
-key *IC-M0-M-a = S-Home
-key *IC-M0-M-e = S-End
-# }}}
-
-# windows {{{
-key M0-q = M-F4
-key M0-s = C-s
-key M0-f = C-f
-
-key M0-w = C-w
-key M0-u = C-Tab
-key M0-i = C-S-Tab
-
-key M0-x = C-x
+# mod0-control {{{
+key M0-a = C-a
+key M0-b = C-b
 key M0-c = C-c
+key M0-d = C-d
+key M0-e = C-e
+key M0-f = C-f
+key M0-g = C-g
+key M0-h = C-h
+key M0-i = C-i
+key M0-j = C-j
+key M0-k = C-k
+key M0-l = C-l
+key M0-m = C-m
+key M0-n = C-n
+key M0-o = C-o
+key M0-p = C-p
+key M0-q = C-q
+key M0-r = C-r
+key M0-s = C-s
+key M0-t = C-t
+key M0-u = C-u
 key M0-v = C-v
-
-key M0-z = C-z
+key M0-w = C-w
+key M0-x = C-x
 key M0-y = C-y
+key M0-z = C-z
+
+key M0-OpenBracket	= C-OpenBracket
+key M0-CloseBracket	= C-CloseBracket
 # }}}
 
-# quick-symbol {{{
+# mod0-symbol {{{
 key M0-*_1 = S-_1
 key M0-*_2 = S-_2
 key M0-*_3 = S-_3
@@ -106,7 +108,107 @@ key M0-*_8 = S-_8
 key M0-*_9 = S-_9
 key M0-*_0 = S-Minus
 # }}}
+
+# vimmer {{{
+key *IC-M0-OpenBracket = Esc
+
+key *IC-M0-n	= Space
+key *IC-M0-m	= Enter
+key *IC-M0-p	= BackSpace
+key *IC-M0-M-p	= Delete
+
+key *IC-M0-*S-h = *S-Left
+key *IC-M0-*S-j = *S-Down
+key *IC-M0-*S-k = *S-Up
+key *IC-M0-*S-l = *S-Right
+
+key *IC-M0-*S-a = *S-Home
+key *IC-M0-*S-e = *S-End
+
+# alt-selection {{{
+key *IC-M0-M-h = S-Left
+key *IC-M0-M-j = S-Down
+key *IC-M0-M-k = S-Up
+key *IC-M0-M-l = S-Right
+
+key *IC-M0-M-a = S-Home
+key *IC-M0-M-e = S-End
 # }}}
+
+key *IC-M0-M1-*S-j = *S-PageDown
+key *IC-M0-M1-*S-k = *S-PageUp
+# }}}
+
+# window-control {{{
+# launcher {{{
+key M2-S-e = &HelpMessage("launcher", "explorer") \
+	&ShellExecute(open, "explorer.exe", "%HOME%",, ShowNormal)
+
+key M2-S-z = &HelpMessage("launcher", "word") \
+	&ShellExecute( \
+		open, \
+		"C:/Program Files (x86)/Microsoft Office/Office14/WINWORD.EXE",,, \
+		ShowNormal)
+
+key M2-S-x = &HelpMessage("launcher", "virtualbox") \
+	&ShellExecute( \
+	open, \
+	"C:/Program Files/Oracle/VirtualBox/VirtualBox.exe",,, \
+	ShowNormal)
+
+key M2-S-c = &HelpMessage("launcher", "firefox") \
+	U-LeftShift &Sync &ShellExecute( \
+		open, \
+		"C:/Program Files (x86)/Mozilla Firefox/firefox.exe",,, \
+		ShowNormal)
+
+key M2-S-v = &HelpMessage("launcher", "vim") \
+	&ShellExecute( \
+		open, \
+		"C:/Users/hirakaku/Dropbox/app/vim/gvim.exe",,, \
+		ShowNormal)
+# }}}
+
+# foregrounding {{{
+key M2-e = &HelpMessage("foregrounding", "explorer") \
+	&SetForegroundWindow(/CabinetWClass/)
+
+key M2-z = &HelpMessage("foregrounding", "word") \
+	&SetForegroundWindow(/OpusApp/)
+
+key M2-x = &HelpMessage("foregrounding", "virtualbox") \
+	&SetForegroundWindow(/QWidget/)
+
+key M2-c = &HelpMessage("foregrounding", "firefox") \
+	&SetForegroundWindow(/MozillaWindowClass/)
+
+key M2-v = &HelpMessage("foregrounding", "vim") \
+	&SetForegroundWindow(/Vim/)
+# }}}
+
+key M2-q	= &WindowClose
+key M2-r	= &WindowMaximize
+key M2-S-r	= &WindowMinimize
+
+key M2-w = &WindowMove(0, -32)
+key M2-a = &WindowMove(-32, 0)
+key M2-s = &WindowMove(0, 32)
+key M2-d = &WindowMove(32, 0)
+
+key M2-S-w = &WindowVMaximize
+key M2-S-a = &WindowMonitorTo(current, -1, true, true)
+key M2-S-s = &WindowHMaximize
+key M2-S-d = &WindowMonitorTo(current, 1, true, true)
+# }}}
+# }}}
+# }}}
+
+window virtualbox /VirtualBox\.exe/ : global # {{{
+key M0-PrintScreen = RightControl PrintScreen
+# }}}
+
+# invalidation {{{
+window sai /sai\.exe/
 # }}}
 
 # vim: ts=4 sw=4 ff=unix fdm=marker:

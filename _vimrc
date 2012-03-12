@@ -1,6 +1,5 @@
-" File:			dotfiles/_vimrc
+" File:			$dotfiles/_vimrc
 " Author:		hirakaku <hirakaku@gmail.com>
-" Version:	v0.2a
 
 set nocompatible
 
@@ -70,17 +69,21 @@ filetype indent on
 " Option: env {{{
 " Option: os {{{
 if has('win32') || has('win64')
-	let $osname = 'Windows'
-	let $dotfiles = $HOME . '/dotfiles'
-	let $tmpdirs = $TEMP
+	let $osname		= 'Windows'
+	let $winhome	= $HOMEDRIVE . $HOMEPATH
+	let $dotfiles	= $HOME . '/dotfiles'
+	let $tmpdirs	= $TEMP
+	let $msys			= $winhome . '/App/msys'
+
+	set shell=C:/Users/hirakaku/App/msys/bin/sh.exe\ -f
 else
+	let $osname		= system('uname')
+	let $dotfiles	= '~/dotfiles'
+	let $tmpdirs	= '~/tmp,/var/tmp,/tmp'
+	let $tct			= '~/dev/scqemu/test/tct'
+
 	colorscheme elflord
 	set path=.,,/usr/local/include,/usr/include,./include
-
-	let $osname = system('uname')
-	let $dotfiles = '~/dotfiles'
-	let $tmpdirs = '~/tmp,/var/tmp,/tmp'
-	let $tctdir = '~/dev/scqemu/test/tct'
 endif
 " }}}
 
@@ -98,12 +101,16 @@ command! -nargs=? -complete=help H
 			\ h <args> | normal <C-w>L
 " }}}
 
+" Plugin: unite {{{
+let unite_data_directory = $dotvim . '/.unite'
+" }}}
+
 " Plugin: vimfiler {{{
-let vimfiler_data_directory = $tmpdirs . '/.vimfiler'
+let vimfiler_data_directory = $dotvim . '/.vimfiler'
 " }}}
 
 " Plugin: vimshell {{{
-let vimshell_temporary_directory = $tmpdirs . '/.vimshell'
+let vimshell_temporary_directory = $dotvim . '/.vimshell'
 " }}}
 
 " Plugin: quickrun {{{
@@ -145,7 +152,7 @@ let quickrun_config.tct = {
 			\ 'exec'			: ['%c %o %s %a',
 			\ 'qemu-system-tct -nographic -kernel a.out 2>&1'],
 			\ 'command'		: 'tct-elf-gcc',
-			\ 'cmdopt'		: expand('-T $tctdir/tct.ld $tctdir/opc/crt0.s'),
+			\ 'cmdopt'		: expand('-T $tct/tct.ld $tct/opc/crt0.s'),
 			\ 'outputter'	: 'mixed',
 			\ }
 
@@ -550,17 +557,20 @@ nnoremap <Leader>vs :w !sh<CR>
 nnoremap <Leader>vw :w sudo:%
 
 " vimrc
-let $vimrc = $dotfiles . '/_vimrc'
-let $gvimrc = $dotfiles . '/_gvimrc'
-let $nodokarc = $dotfiles . '/dot.nodoka'
+let $vimrc				= $dotfiles . '/_vimrc'
+let $gvimrc				= $dotfiles . '/_gvimrc'
+let $nodokarc			= $dotfiles . '/dot.nodoka'
+let $vimperatorrc	= $dotfiles . '/_vimperatorrc'
 
 nnoremap <Leader>v	:e $vimrc<CR>
-nnoremap <Leader>vv	:vnew $vimrc<CR><C-w>L
+nnoremap <Leader>vv	:vnew $vimrc<CR>
 nnoremap <Leader>vV	:tabe $vimrc<CR>
-nnoremap <Leader>vg :vnew $gvimrc<CR>
-nnoremap <Leader>vG :tabe $gvimrc<CR>
-nnoremap <Leader>vn :vnew $nodokarc<CR>
-nnoremap <Leader>vN :tabe $nodokarc<CR>
+nnoremap <Leader>vg	:vnew $gvimrc<CR>
+nnoremap <Leader>vG	:tabe $gvimrc<CR>
+nnoremap <Leader>vn	:vnew $nodokarc<CR>
+nnoremap <Leader>vN	:tabe $nodokarc<CR>
+nnoremap <Leader>vp	:vnew $vimperatorrc<CR>
+nnoremap <Leader>vP	:tabe $vimperatorrc<CR>
 nnoremap <Leader>V	:so %<CR>
 
 " scratch buffer
@@ -646,13 +656,13 @@ nnoremap <Leader>c	:Ci386<CR>
 nnoremap <Leader>cI	:Ci386<CR>
 nnoremap <Leader>cA	:Carm<CR>
 nnoremap <Leader>cS	:Csymcompletion<CR>
-nnoremap <Leader>cP :Cproject <C-r>=strftime('%y%m%d')<CR>.gdb
+nnoremap <Leader>cP	:Cproject <C-r>=strftime('%y%m%d')<CR>.gdb
 nnoremap <Leader>cq	:nbclose<CR>:bdelete (clewn)_console<CR>
 nnoremap <Leader>cs	:Csigint<CR>
 nnoremap <Leader>cp	:Cprint 
 nnoremap <Leader>cb	:Cbreak 
-vnoremap <Leader>cp "*y:<C-u>Cprint <C-r>*<CR>
-vnoremap <Leader>cb "*y:<C-u>Cbreak <C-r>*<CR>
+vnoremap <Leader>cp	"*y:<C-u>Cprint <C-r>*<CR>
+vnoremap <Leader>cb	"*y:<C-u>Cbreak <C-r>*<CR>
 " }}}
 
 " Map: EasyMotion {{{
@@ -718,11 +728,11 @@ augroup noname
 	autocmd VimEnter * cmap <C-w> <M-BS>
 	autocmd VimEnter *.snip setlocal filetype=snippet
 	autocmd BufReadPost ~/dev/linux-stable/*
-				\	set path^=~/dev/linux-stable/include
+				\ set path^=~/dev/linux-stable/include
 	autocmd BufReadPost *
-				\	if line("'\"") > 1 && line("'\"") <= line('$')
-				\	| exe "normal! g`\""
-				\	| endif
+				\ if line("'\"") > 1 && line("'\"") <= line('$')
+				\ | exe "normal! g`\""
+				\ | endif
 augroup END
 " }}}
 
@@ -738,7 +748,7 @@ augroup END
 
 " Autocmd: nasty space {{{
 highlight nasty_space ctermbg=Red guibg=Red
-autocmd VimEnter,WinEnter * match nasty_space /　\|\s\+$/ 
+autocmd VimEnter,WinEnter,BufEnter * match nasty_space /　\|\s\+$/ 
 " }}}
 
 " Augroup: neocomplcache {{{

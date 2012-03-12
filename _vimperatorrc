@@ -1,0 +1,26 @@
+" File:		$dotfiles/_vimperatorrc
+" Author:	hirakaku <hirakaku@gmail.com>
+
+set titlestring='firefox'
+set runtimepath=~/.vimperator
+
+" Option: beep {{{
+set visualbell
+highlight Bell display:none
+" }}}
+
+set focuscontent
+set hintchars=@abcdefghijklmnopqrstuvwxyz
+
+" Plugin: feedSomeKeys_2.js {{{
+command! -nargs=+ lazy autocmd VimperatorEnter .* <args>
+lazy fmaps -u="www.google.com/reader" j k
+" }}}
+
+" Map: {{{
+let mapleader = ','
+
+map <Leader>V :so ~/.vimperatorrc<CR>
+" }}}
+
+" vim: ts=2 sw=2 fenc=utf-8 ff=unix fdm=marker ft=vim:
