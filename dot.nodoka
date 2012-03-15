@@ -1,4 +1,4 @@
-# File:		$dotfiles/dot.nodoka
+# File:		dot.nodoka
 # Author:	hirakaku
 
 # $ProgramW6432/nodoka/109.nodoka
@@ -14,7 +14,8 @@ def option delay-of !!!		= 30
 
 keymap global # {{{
 # mods {{{
-mod Shift += !!Space
+mod Control	+= !!Space
+
 mod Mod0 = !!Eisuu
 mod Mod1 = !!NonConvert
 mod Mod2 = !!Convert
@@ -22,15 +23,14 @@ mod Mod3 = !!Hiragana
 mod Mod4 = !!Colon
 
 key *Eisuu		= &Ignore
-key *Convert	= &Ignore
 key *NonConvert	= &Ignore
-key *Hiragana	= &Ignore
+key *Convert	= &Ignore
 key *Hiragana	= &Ignore
 # }}}
 
 # nodoka {{{
 key M0-F5 = &HelpMessage("nodoka", "reload setting\ndotfiles") \
-	&LoadSetting("dotfiles")
+	&LoadSetting("home")
 
 key M0-F6 = &HelpMessage("nodoka", "show log") \
 	&SendPostMessage(PostTray,, "‚Ì‚Ç‚©", 0x205, 0x0, 0x0)
@@ -115,7 +115,7 @@ key *IC-M0-OpenBracket = Esc
 key *IC-M0-n	= Space
 key *IC-M0-m	= Enter
 key *IC-M0-p	= BackSpace
-key *IC-M0-M-p	= Delete
+key *IC-M0-A-p	= Delete
 
 key *IC-M0-*S-h = *S-Left
 key *IC-M0-*S-j = *S-Down
@@ -126,17 +126,42 @@ key *IC-M0-*S-a = *S-Home
 key *IC-M0-*S-e = *S-End
 
 # alt-selection {{{
-key *IC-M0-M-h = S-Left
-key *IC-M0-M-j = S-Down
-key *IC-M0-M-k = S-Up
-key *IC-M0-M-l = S-Right
+key *IC-M0-A-h = S-Left
+key *IC-M0-A-j = S-Down
+key *IC-M0-A-k = S-Up
+key *IC-M0-A-l = S-Right
 
-key *IC-M0-M-a = S-Home
-key *IC-M0-M-e = S-End
+key *IC-M0-A-a = S-Home
+key *IC-M0-A-e = S-End
 # }}}
 
 key *IC-M0-M1-*S-j = *S-PageDown
 key *IC-M0-M1-*S-k = *S-PageUp
+# }}}
+
+# mouse-control {{{
+key M0-D-~R-q	= D-LButton
+key M0-D-R-q	= &Ignore
+key M0-U-q		= U-LButton
+
+key M0-D-~R-M-q	= D-RButton
+key M0-D-R-M-q	= &Ignore
+key M0-U-M-q	= U-RButton
+
+key M0-~R-Tab	= &HelpMessage("scroller", "x12") &MouseHook(Wheel, -12)
+key M0-A-~R-Tab	= &HelpMessage("scroller", "x3") &MouseHook(Wheel, -3)
+key M0-*A-R-Tab	= &Ignore
+key M0-*A-U-Tab	= &HelpMessage &MouseHook(None, 0)
+
+key M2-k = WheelForward
+key M2-j = WheelBackward
+
+# mouse-without-boarders {{{
+key M0-A-~R-_1	= C-A-_1
+key M0-A-R-_1	= &Ignore
+key M0-A-~R-_2	= C-A-_2
+key M0-A-R-_2	= &Ignore
+# }}}
 # }}}
 
 # window-control {{{

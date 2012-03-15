@@ -1,4 +1,4 @@
-" File:			$dotfiles/_vimrc
+" File:			_vimrc
 " Author:		hirakaku <hirakaku@gmail.com>
 
 set nocompatible
@@ -13,6 +13,7 @@ if has('vim_starting')
 	" git clone neobundle here!
 	set runtimepath+=$dotvim/bundle/neobundle.vim
 	let $bundle = expand('$dotvim/bundle')
+	let $plugin = expand('$dotvim/plugin')
 	call neobundle#rc($bundle)
 endif
 " }}}
@@ -22,7 +23,6 @@ NeoBundle 'fuenor/vim-wordcount'
 NeoBundle 'gregsexton/VimCalc'
 NeoBundle 'houtsnip/vim-emacscommandline'
 NeoBundle 'kana/vim-smartchr'
-NeoBundle 'kana/vim-textobj-fold'
 NeoBundle 'kana/vim-textobj-indent'
 NeoBundle 'kana/vim-textobj-lastpat'
 NeoBundle 'kana/vim-textobj-user'
@@ -61,6 +61,10 @@ NeoBundle 'errormarker.vim'
 NeoBundle 'sudo.vim'
 NeoBundle 'YankRing.vim'
 " }}}
+
+" @ local {{{
+source $plugin/textobj-fold.vim
+" }}}
 " }}}
 
 filetype plugin on
@@ -74,8 +78,6 @@ if has('win32') || has('win64')
 	let $dotfiles	= $HOME . '/dotfiles'
 	let $tmpdirs	= $TEMP
 	let $msys			= $winhome . '/App/msys'
-
-	set shell=C:/Users/hirakaku/App/msys/bin/sh.exe\ -f
 else
 	let $osname		= system('uname')
 	let $dotfiles	= '~/dotfiles'
@@ -156,8 +158,8 @@ let quickrun_config.tct = {
 			\ 'outputter'	: 'mixed',
 			\ }
 
-let quickrun_config['c.tct'] = quickrun_config.tct
-let quickrun_config['asm.tct'] = quickrun_config.tct
+let quickrun_config['c.tct']		= quickrun_config.tct
+let quickrun_config['asm.tct']	= quickrun_config.tct
 " }}}
 
 " Command: Call, Hook {{{
@@ -377,15 +379,15 @@ exe 'source ' . expand($dotvim) . '/bundle/vim-wordcount/wordcount.vim'
 
 " Function: GetFencAndFF() {{{
 function! GetFencAndFF()
-	if &fenc == 'utf-8' | let fenc = 'u'
-	elseif &fenc == 'euc-jp' | let fenc = 'e'
-	elseif &fenc == 'cp932' | let fenc = 'c'
-	elseif &fenc == 'iso-2022-jp' | let fenc = 'i'
+	if			&fenc == 'utf-8'				| let fenc = 'u'
+	elseif	&fenc == 'euc-jp'				| let fenc = 'e'
+	elseif	&fenc == 'cp932'				| let fenc = 'c'
+	elseif	&fenc == 'iso-2022-jp'	| let fenc = 'i'
 	else | let fenc = '-' | endif
 
-	if &ff == 'unix' | let ff = 'u'
-	elseif &ff == 'mac' | let ff = 'm'
-	elseif &ff == 'dos' | let ff = 'w'
+	if			&ff == 'unix'	| let ff = 'u'
+	elseif	&ff == 'mac'	| let ff = 'm'
+	elseif	&ff == 'dos'	| let ff = 'w'
 	else | let ff = '-' | endif
 
 	return fenc . ff
@@ -401,8 +403,8 @@ set backspace=indent,eol,start
 " Plugin: indent-guides {{{
 " <Leader>ig => enable / disable
 " let indent_guides_enable_on_vim_startup = 1
-let indent_guides_guide_size = 1
-let indent_guides_auto_colors = 0
+let indent_guides_guide_size	= 1
+let indent_guides_auto_colors	= 0
 highlight IndentGuidesOdd ctermbg=DarkRed
 highlight IndentGuidesEven ctermbg=DarkBlue
 " }}}
@@ -415,11 +417,11 @@ set matchtime=3
 runtime macros/matchit.vim
 
 " Plugin: YankRing {{{
-let yankring_max_history = 16
-let yankring_window_height = 11
+let yankring_max_history		= 16
+let yankring_window_height	= 11
 let yankring_manage_numbered_reg = 1
-let yankring_history_dir = $dotvim
-let yankring_history_file = '.yankring'
+let yankring_history_dir	= $dotvim
+let yankring_history_file	= '.yankring'
 " }}}
 " }}}
 
@@ -436,10 +438,10 @@ highlight ShowMarksHLm ctermfg=White ctermbg=DarkGray
 " }}}
 
 " Plugin: errormarker {{{
-let errormarker_errortext = '!!'
-let errormarker_warningtext = '??'
-let errormaker_errorgroup = 'Error'
-let Errormaker_warninggroup = 'Todo'
+let errormarker_errortext		= '!!'
+let errormarker_warningtext	= '??'
+let errormaker_errorgroup		= 'Error'
+let Errormaker_warninggroup	= 'Todo'
 " }}}
 " }}}
 
@@ -496,12 +498,12 @@ set completeopt=longest,menuone,preview
 
 " Plugin: necomplcache {{{
 let neocomplcache_enable_at_startup = 1
-let neocomplcache_temporary_dir = $dotvim . '/.neco'
-let neocomplcache_snippets_dir = $dotvim . '/snip'
+let neocomplcache_temporary_dir	= $dotvim . '/.neco'
+let neocomplcache_snippets_dir	= $dotvim . '/snip'
 let neocomplcache_min_syntax_length = 3
 let neocomplcache_enable_smart_case = 1
-let neocomplcache_enable_camel_case_completion = 1
-let neocomplcache_enable_underbar_completion = 1
+let neocomplcache_enable_camel_case_completion	= 1
+let neocomplcache_enable_underbar_completion		= 1
 
 " dictionaries {{{
 let g:neocomplcache_dictionary_filetype_lists = {
@@ -542,12 +544,43 @@ let mapleader = ','
 nnoremap j gj
 nnoremap k gk
 
-inoremap <Esc> <Esc>:set iminsert=0<CR>
+vnoremap < <gv
+vnoremap > >gv
+
+nnoremap <C-w>e <C-w>=
+
+inoremap <Esc>			<Esc>:set iminsert=0<CR>
+nnoremap <ESC><ESC>	:noh<CR>
+
+" quick edit {{{
+let $vimrc				= $dotfiles . '/_vimrc'
+let $gvimrc				= $dotfiles . '/_gvimrc'
+let $nodokarc			= $dotfiles . '/dot.nodoka'
+let $vimperatorrc	= $dotfiles . '/_vimperatorrc'
+
+nnoremap <Leader>v		:e $vimrc<CR>
+nnoremap <Leader>vv		:vnew $vimrc<CR>
+nnoremap <Leader>vV		:tabe $vimrc<CR>
+nnoremap <Leader>vg		:e $gvimrc<CR>
+nnoremap <Leader>vgg	:vnew $gvimrc<CR>
+nnoremap <Leader>vG		:tabe $gvimrc<CR>
+nnoremap <Leader>vn		:e $nodokarc<CR>
+nnoremap <Leader>vnn	:vnew $nodokarc<CR>
+nnoremap <Leader>vN		:tabe $nodokarc<CR>
+nnoremap <Leader>vp		:e $vimperatorrc<CR>
+nnoremap <Leader>vpp	:vnew $vimperatorrc<CR>
+nnoremap <Leader>vP		:tabe $vimperatorrc<CR>
+nnoremap <Leader>vt		:e `=tempname()`<CR>
+nnoremap <Leader>vT		:e `=strftime('%y%m%d-%H%M')`<CR>
+
+nnoremap <Leader>V		:so %<CR>
+nnoremap <Leader>Vh		:so $VIMRUNTIME/syntax/hitest.vim<CR>
 
 nnoremap <Leader>:e :e %:h/
 nnoremap <Leader>:n :new %:h/
 nnoremap <Leader>:v :vnew %:h/
 nnoremap <Leader>:t :tabe %:h/
+" }}}
 
 nnoremap <Leader>vc :Calc<CR>
 nnoremap <Leader>vf :VimFiler<CR>
@@ -555,41 +588,11 @@ nnoremap <Leader>vF :FullScreen<CR>
 nnoremap <Leader>vm :Make 
 nnoremap <Leader>vs :w !sh<CR>
 nnoremap <Leader>vw :w sudo:%
-
-" vimrc
-let $vimrc				= $dotfiles . '/_vimrc'
-let $gvimrc				= $dotfiles . '/_gvimrc'
-let $nodokarc			= $dotfiles . '/dot.nodoka'
-let $vimperatorrc	= $dotfiles . '/_vimperatorrc'
-
-nnoremap <Leader>v	:e $vimrc<CR>
-nnoremap <Leader>vv	:vnew $vimrc<CR>
-nnoremap <Leader>vV	:tabe $vimrc<CR>
-nnoremap <Leader>vg	:vnew $gvimrc<CR>
-nnoremap <Leader>vG	:tabe $gvimrc<CR>
-nnoremap <Leader>vn	:vnew $nodokarc<CR>
-nnoremap <Leader>vN	:tabe $nodokarc<CR>
-nnoremap <Leader>vp	:vnew $vimperatorrc<CR>
-nnoremap <Leader>vP	:tabe $vimperatorrc<CR>
-nnoremap <Leader>V	:so %<CR>
-
-" scratch buffer
-nnoremap <Leader>vt :e `=tempname()`<CR>
-nnoremap <Leader>vT :e `=strftime('%y%m%d-%H%M')`<CR>
-
-" xxd
 nnoremap <Leader>vx :set ft=xxd<CR>:%!xxd<CR>
 nnoremap <Leader>vX :%!xxd -r<CR>:e!<CR>
+" }}}
 
-" highlight
-nnoremap <Leader>vh :so $VIMRUNTIME/syntax/hitest.vim<CR>
-nnoremap <ESC><ESC> :noh<CR>
-
-" indent
-vnoremap < <gv
-vnoremap > >gv
-
-" selection
+" Map: selection {{{
 vnoremap <Leader>n ojok
 vnoremap <Leader>N okoj
 vnoremap a/ :<C-u>silent! normal! [/V]/<CR>
@@ -597,20 +600,9 @@ vnoremap a* :<C-u>silent! normal! [*V]*<CR>
 vnoremap i/ :<C-u>silent! normal! [/jV]/k<CR>
 vnoremap i* :<C-u>silent! normal! [*jV]*k<CR>
 nnoremap <expr> gV '`[' . strpart(getregtype(), 0, 1) . '`]'
+" }}}
 
-" substitution
-nnoremap ss		s
-nnoremap se		ce<C-r>0<ESC>
-nnoremap sE		cE<C-r>0<ESC>
-nnoremap siw	ciw<C-r>0<ESC>
-nnoremap siW	ciW<C-r>0<ESC>
-nnoremap sC		C<c-r>0<ESC>
-nnoremap sS		S<C-r>0<ESC>
-nnoremap sp		S<C-r>0<ESC>
-vnoremap ss		s
-vnoremap sp		c<C-r>0<ESC>
-
-" expand
+" Map: expand {{{
 inoremap <expr> <C-r>:: expand('%')
 inoremap <expr> <C-r>:/ expand('%:p')
 inoremap <expr> <C-r>:~ expand('%:~')
@@ -621,6 +613,7 @@ inoremap <expr> <C-r>:d expand('%:p:h')
 
 " Map: neobundle {{{
 nnoremap <Leader>vbi :NeoBundleInstall<CR>
+nnoremap <Leader>vbu :NeoBundleInstall! 
 nnoremap <Leader>vbc :NeoBundleClean<CR>
 nnoremap <Leader>vbd :NeoBundleDocs<CR>
 nnoremap <Leader>vbl :NeoBundleList<CR>
@@ -713,7 +706,7 @@ smap <C-k> <Plug>(neocomplcache_snippets_expand)
 inoremap <expr> <C-g> neocomplcache#undo_completion()
 inoremap <expr> <C-l> neocomplcache#complete_common_string()
 " inoremap <expr> <CR> neocomplcache#smart_close_popup() . "\<CR>"
-inoremap <expr> <Tab> pumvisible() ? "\<C-n>" : "\<Tab>"
+" inoremap <expr> <Tab> pumvisible() ? "\<C-n>" : "\<Tab>"
 inoremap <expr> <C-h> neocomplcache#smart_close_popup() . "\<C-h>"
 inoremap <expr> <C-h> neocomplcache#smart_close_popup() . "\<C-h>"
 inoremap <expr> <C-y> pumvisible() ? neocomplcache#close_popup() : "\<C-y>"
