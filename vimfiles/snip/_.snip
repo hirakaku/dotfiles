@@ -1,7 +1,17 @@
-# File:     _.snip
-# Author:   hirakaku
+# File:		dotfiles/vimfiles/snip/_.snip
+# Author:	hirakaku <hirakaku@gmail.com>
 
 snippet header#
 prev_word '^'
-    # File:     ${1:`expand('%:t')`}
-    # Author:   ${2:hirakaku}
+    # File:		${1:`expand('%')`}
+    # Author:	${2:`$NAME`} <${3:`$EMAIL`}>
+
+snippet header*
+prev_word '^'
+    /*
+     * ${1:`expand('%')`}
+     *
+     * Copyright (c) ${2:`strftime('%Y')`} ${3:`$NAME`}
+     * Written by ${4:`$NAME`} <${5:`$EMAIL`}>
+     *
+     */

@@ -1,2 +1,7 @@
-# File:     vim.snip
-# Author:   hirakaku
+# File:		dotfiles/vimfiles/snip/vim.snip
+# Author:	hirakaku <hirakaku@gmail.com>
+
+snippet header
+prev_word '^'
+    " File:		${1:`expand('%')`}
+    " Author:	${2:`$NAME`} <${3:`$EMAIL`}>

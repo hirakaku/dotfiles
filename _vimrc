@@ -1,5 +1,5 @@
-" File:			_vimrc
-" Author:		hirakaku <hirakaku@gmail.com>
+" File:		dotfiles/_vimrc
+" Author:	hirakaku <hirakaku@gmail.com>
 
 set nocompatible
 
@@ -19,16 +19,6 @@ endif
 " }}}
 
 " @ github {{{
-NeoBundle 'Lokaltog/vim-easymotion'
-NeoBundle 'Shougo/echodoc'
-NeoBundle 'Shougo/neobundle.vim'
-NeoBundle 'Shougo/neocomplcache'
-NeoBundle 'Shougo/neocomplcache-snippets-complete'
-NeoBundle 'Shougo/unite.vim'
-NeoBundle 'Shougo/vimfiler'
-NeoBundle 'Shougo/vimproc'
-NeoBundle 'Shougo/vimshell'
-NeoBundle 'Shougo/vinarise'
 NeoBundle 'fuenor/qfixgrep'
 NeoBundle 'fuenor/vim-wordcount'
 NeoBundle 'gregsexton/VimCalc'
@@ -38,7 +28,17 @@ NeoBundle 'kana/vim-smartchr'
 NeoBundle 'kana/vim-textobj-indent'
 NeoBundle 'kana/vim-textobj-lastpat'
 NeoBundle 'kana/vim-textobj-user'
+NeoBundle 'Lokaltog/vim-easymotion'
 NeoBundle 'nathanaelkane/vim-indent-guides'
+NeoBundle 'Shougo/echodoc'
+NeoBundle 'Shougo/neobundle.vim'
+NeoBundle 'Shougo/neocomplcache'
+NeoBundle 'Shougo/neocomplcache-snippets-complete'
+NeoBundle 'Shougo/unite.vim'
+NeoBundle 'Shougo/vimfiler'
+NeoBundle 'Shougo/vimproc'
+NeoBundle 'Shougo/vimshell'
+NeoBundle 'Shougo/vinarise'
 NeoBundle 'thinca/vim-poslist'
 NeoBundle 'thinca/vim-quickrun'
 NeoBundle 'thinca/vim-ref'
@@ -134,7 +134,7 @@ set statusline+=%=
 set statusline+=%04l,%04v\ %L*%P
 
 " Plugin: wordcount {{{
-exe 'source ' . expand($dotvim) . '/bundle/vim-wordcount/wordcount.vim'
+source $dotvim/bundle/vim-wordcount/wordcount.vim
 " }}}
 
 " Function: GetFencAndFF() {{{
@@ -549,7 +549,7 @@ let QFix_PreviewFtypeHighlight = 1
 let QFix_PreviewCursorLine = 1
 let QFix_PreviewWrap = 0
 
-let MyGrep_Key = ','
+let MyGrep_Key = '<Leader>'
 let MyGrep_KeyB = 'q'
 " }}}
 " }}}
@@ -614,7 +614,7 @@ let &undolevels = 1024 * 1024
 
 " Feature: persistent_undo {{{
 if has('persistent_undo')
-	let &undodir = $dotvim . '/.undo'
+	set undodir=$dotvim/.undo
 	set undofile
 endif
 " }}}
@@ -823,10 +823,10 @@ endif
 " Map: neocomplcache {{{
 nnoremap <Leader>ns :NecoSnip<Space>
 nnoremap <Leader>nS :NecoRSnip<Space>
-imap <C-k> <Plug>(neocomplcache_snippets_expand)
-smap <C-k> <Plug>(neocomplcache_snippets_expand)
+imap <C-l> <Plug>(neocomplcache_snippets_expand)
+smap <C-l> <Plug>(neocomplcache_snippets_expand)
 inoremap <expr> <C-g> neocomplcache#undo_completion()
-inoremap <expr> <C-l> neocomplcache#complete_common_string()
+" inoremap <expr> <C-l> neocomplcache#complete_common_string()
 " inoremap <expr> <CR> neocomplcache#smart_close_popup() . "\<CR>"
 " inoremap <expr> <Tab> pumvisible() ? "\<C-n>" : "\<Tab>"
 inoremap <expr> <C-h> neocomplcache#smart_close_popup() . "\<C-h>"
@@ -878,4 +878,4 @@ augroup neocomplcache
 augroup END
 " }}}
 
-" vim: ts=2 sw=2 fenc=utf-8 ff=unix fdm=marker:
+" vim: ts=2 sw=2 ff=unix fdm=marker:

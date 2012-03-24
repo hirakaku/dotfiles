@@ -1,5 +1,5 @@
-# File:		dot.nodoka
-# Author:	hirakaku
+# File:		dotfiles/dot.nodoka
+# Author:	hirakaku <hirakaku@gmail.com>
 
 # $ProgramW6432/nodoka/109.nodoka
 include "109.nodoka"

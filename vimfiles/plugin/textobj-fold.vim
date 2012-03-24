@@ -1,5 +1,5 @@
-" File:			textobj-fold.vim
-" Author:		hirakaku <hirakaku@gmail.com>
+" File:		vimfiles/plugin/textobj-fold.vim
+" Author:	hirakaku <hirakaku@gmail.com>
 
 " Level: 1 {{{
 "	Level: 2 {{{
@@ -99,6 +99,6 @@ function! s:select_fold_i() " {{{
 	return ['V', start, end]
 endfunction " }}}
 
-" let g:textobj_fold_loaded = 1
+let g:textobj_fold_loaded = 1
 
 " vim: ts=2 sw=2 ff=unix fdm=marker:
