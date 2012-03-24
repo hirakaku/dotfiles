@@ -1,7 +1,6 @@
 # File:     _zshrc
 # Author:   hirakaku
 
-bindkey -v
 umask 022
 
 # path {{{
@@ -44,6 +43,20 @@ RPROMPT='%{$fg_bold[blue]%}'
 RPROMPT+='%d'
 RPROMPT+='%{$reset_color%}'
 RPROMPT+=':%!'
+
+# vi-mode {{{
+zle -N zle-line-init
+zle -N zle-keymap-select
+
+function zle-line-init zle-keymap-select
+{
+	if [ $KEYMAP = vicmd ]; then
+		tput civis
+	else
+		tput cnorm
+	fi
+}
+# }}}
 # }}}
 
 # cd {{{
@@ -129,8 +142,13 @@ zstyle ':completion:*:default' list-colors ${(s/:/)LS_COLORS}
 # }}}
 
 # bindkeys {{{
+bindkey -v
+
 bindkey '^A' beginning-of-line
 bindkey '^E' end-of-line
+bindkey 'OH' beginning-of-line
+bindkey 'OF' end-of-line
+
 bindkey '^P' history-beginning-search-backward
 bindkey '^N' history-beginning-search-forward
 # }}}
@@ -151,12 +169,25 @@ alias -g H='| head'
 alias -g T='| tail'
 alias -g G='| grep'
 alias -g V='| vim -'
+# }}}
+
+# apt {{{
+alias aps='apt-cache search'
+alias apf='apt-file search'
+alias apdate='sudo apt-get update'
+alias apgrade='sudo apt-get upgrade'
+alias apstall='sudo apt-get install'
+# }}}
+
+# cd {{{
+alias up='cd ..'
+# }}}
 
 # ls {{{
 alias ls='ls --color=always -F'
 alias la='ls -a'
 alias ll='ls -l'
-alias lm='ls -ltr'
+alias lm='ls -altr'
 # }}}
 
 # less {{{
@@ -165,7 +196,6 @@ alias less='less -R'
 
 # grep {{{
 alias grep='grep --color=always'
-# }}}
 # }}}
 # }}}
 

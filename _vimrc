@@ -647,8 +647,8 @@ map		<Esc>OH 0
 map		<Esc>OF $
 cmap	<Esc>OH <C-a>
 cmap	<Esc>OF <C-e>
-imap	<Esc>OH 0
-imap	<Esc>OF $
+imap	<Esc>OH <C-o>0
+imap	<Esc>OF <C-o>$
 " }}}
 
 vnoremap < <gv
@@ -657,7 +657,7 @@ vnoremap > >gv
 nnoremap <C-w>e <C-w>=
 
 inoremap <Esc>			<Esc>:set iminsert=0<CR>
-nnoremap <ESC><ESC>	:noh<CR>
+nnoremap <Esc><Esc>	:noh<CR>
 
 nnoremap <Leader>vc :Calc<CR>
 nnoremap <Leader>vf :VimFiler<CR>
