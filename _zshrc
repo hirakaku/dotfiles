@@ -1,0 +1,172 @@
+# File:     _zshrc
+# Author:   hirakaku
+
+bindkey -v
+umask 022
+
+# path {{{
+typeset -U path
+
+path=(\
+	$HOME/bin		\
+	/usr/local/bin	\
+	/usr/bin		\
+	/bin)
+# }}}
+
+# exports {{{
+export LANG='en_US.UTF-8'
+export TERM='xterm-256color'
+export SHELL='/bin/zsh'
+export EDITOR='vim'
+# }}}
+
+# beep {{{
+unsetopt beep
+unsetopt list_beep
+unsetopt hist_beep
+# }}}
+
+# prompt {{{
+setopt prompt_subst
+autoload -Uz colors; colors
+
+PROMPT='%B'
+PROMPT+='%(!'
+PROMPT+='|%{$fg_bold[white]%}'
+PROMPT+='|%{$fg_bold[red]%})'
+PROMPT+='%n>'
+PROMPT+='%{$reset_color%}'
+PROMPT+='%b'
+PROMPT+=' '
+
+RPROMPT='%{$fg_bold[blue]%}'
+RPROMPT+='%d'
+RPROMPT+='%{$reset_color%}'
+RPROMPT+=':%!'
+# }}}
+
+# cd {{{
+setopt auto_cd
+setopt auto_pushd
+setopt pushd_to_home
+setopt pushd_ignore_dups
+
+# cdpath {{{
+# cdpath=($cdpath $HOME)
+# }}}
+
+# name_dirs {{{
+setopt auto_name_dirs
+setopt cdable_vars
+
+dev=$HOME/dev
+dot=$HOME/dotfiles
+# }}}
+# }}}
+
+# history {{{
+HISTCHARS='!^#'
+HISTFILE=$HOME/.zsh_history
+HISTSIZE=$[1024 * 1024]
+SAVEHIST=$HISTSIZE
+
+setopt share_history
+setopt append_history
+setopt extended_history
+
+setopt hist_verify
+setopt hist_no_store
+setopt hist_ignore_space
+setopt hist_reduce_blanks
+
+# dups {{{
+setopt hist_ignore_dups
+setopt hist_find_no_dups
+# }}}
+
+# history-search-end {{{
+autoload history-search-end
+zle -N history-beginning-search-backward-end history-search-end
+zle -N history-beginning-search-forward-end history-search-end
+# }}}
+# }}}
+
+# completion {{{
+autoload -U compinit && compinit
+setopt list_packed
+setopt magic_equal_subst
+
+# list-colors {{{
+# LS_COLORS {{{
+LS_BLACK='01;30'
+LS_RED='01;31'
+LS_GREEN='01;32'
+LS_YELLOW='01;33'
+LS_BLUE='01;34'
+LS_MAGENTA='01;35'
+LS_CYAN='01;36'
+LS_WHITE='01;37'
+
+LS_COLORS="fi=$LS_WHITE"
+LS_COLORS+=":di=$LS_BLUE"
+LS_COLORS+=":tw=$LS_BLUE"
+LS_COLORS+=":ow=$LS_BLUE"
+LS_COLORS+=":ln=$LS_CYAN"
+LS_COLORS+=":ex=$LS_RED"
+LS_COLORS+=":su=$LS_MAGENTA"
+LS_COLORS+=":sg=$LS_MAGENTA"
+LS_COLORS+=":pi=$LS_GREEN"
+LS_COLORS+=":so=$LS_GREEN"
+LS_COLORS+=":bd=$LS_YELLOW"
+LS_COLORS+=":cd=$LS_YELLOW"
+
+export LS_COLORS
+# }}}
+
+zstyle ':completion:*:default' list-colors ${(s/:/)LS_COLORS}
+# }}}
+# }}}
+
+# bindkeys {{{
+bindkey '^A' beginning-of-line
+bindkey '^E' end-of-line
+bindkey '^P' history-beginning-search-backward
+bindkey '^N' history-beginning-search-forward
+# }}}
+
+# aliases {{{
+zshrc="$HOME/dotfiles/_zshrc"
+
+alias e='$EDITOR'
+alias rc='e $zshrc'
+alias so='source $zshrc'
+alias zsh='exec zsh'
+
+# globals {{{
+alias -g C='| column'
+alias -g M='| more'
+alias -g L='| less'
+alias -g H='| head'
+alias -g T='| tail'
+alias -g G='| grep'
+alias -g V='| vim -'
+
+# ls {{{
+alias ls='ls --color=always -F'
+alias la='ls -a'
+alias ll='ls -l'
+alias lm='ls -ltr'
+# }}}
+
+# less {{{
+alias less='less -R'
+# }}}
+
+# grep {{{
+alias grep='grep --color=always'
+# }}}
+# }}}
+# }}}
+
+# vim: ft=zsh ts=4 sw=4 ff=unix fdm=marker:

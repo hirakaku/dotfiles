@@ -36,4 +36,4 @@ nnoremap <Leader>i :js modes.passAllKeys = true<CR>
 
 echo '.vimperatorrc was sourced'
 
-" vim: ts=2 sw=2 ff=unix fdm=marker ft=vim:
+" vim: ft=vim ts=2 sw=2 ff=unix fdm=marker:

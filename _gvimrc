@@ -1,6 +1,5 @@
 " File:			_gvimrc
 " Author:		hirakaku <hirakaku@gmail.com>
-" Version:	v0.1
 
 colorscheme desert
 set guioptions=

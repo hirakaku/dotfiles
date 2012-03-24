@@ -10,8 +10,8 @@ filetype off
 let $dotvim = expand('~/.vim')
 
 if has('vim_starting')
-	" git clone neobundle here!
 	set runtimepath+=$dotvim/bundle/neobundle.vim
+	let $ftplugin = '/usr/share/vim/vim73/ftplugin'
 	let $bundle = expand('$dotvim/bundle')
 	let $plugin = expand('$dotvim/plugin')
 	call neobundle#rc($bundle)
@@ -19,15 +19,7 @@ endif
 " }}}
 
 " @ github {{{
-NeoBundle 'fuenor/vim-wordcount'
-NeoBundle 'gregsexton/VimCalc'
-NeoBundle 'houtsnip/vim-emacscommandline'
-NeoBundle 'kana/vim-smartchr'
-NeoBundle 'kana/vim-textobj-indent'
-NeoBundle 'kana/vim-textobj-lastpat'
-NeoBundle 'kana/vim-textobj-user'
 NeoBundle 'Lokaltog/vim-easymotion'
-NeoBundle 'nathanaelkane/vim-indent-guides'
 NeoBundle 'Shougo/echodoc'
 NeoBundle 'Shougo/neobundle.vim'
 NeoBundle 'Shougo/neocomplcache'
@@ -37,6 +29,16 @@ NeoBundle 'Shougo/vimfiler'
 NeoBundle 'Shougo/vimproc'
 NeoBundle 'Shougo/vimshell'
 NeoBundle 'Shougo/vinarise'
+NeoBundle 'fuenor/qfixgrep'
+NeoBundle 'fuenor/vim-wordcount'
+NeoBundle 'gregsexton/VimCalc'
+NeoBundle 'guns/xterm-color-table.vim'
+NeoBundle 'houtsnip/vim-emacscommandline'
+NeoBundle 'kana/vim-smartchr'
+NeoBundle 'kana/vim-textobj-indent'
+NeoBundle 'kana/vim-textobj-lastpat'
+NeoBundle 'kana/vim-textobj-user'
+NeoBundle 'nathanaelkane/vim-indent-guides'
 NeoBundle 'thinca/vim-poslist'
 NeoBundle 'thinca/vim-quickrun'
 NeoBundle 'thinca/vim-ref'
@@ -56,19 +58,21 @@ NeoBundle 'zhaocai/unite-scriptnames'
 " }}}
 
 " @ vim-scripts {{{
+" NeoBundle 'YankRing.vim'
 NeoBundle 'DirDiff.vim'
 NeoBundle 'errormarker.vim'
 NeoBundle 'sudo.vim'
-NeoBundle 'YankRing.vim'
 " }}}
 
 " @ local {{{
+source $ftplugin/man.vim
 source $plugin/textobj-fold.vim
 " }}}
 " }}}
 
 filetype plugin on
 filetype indent on
+syntax on
 
 " Option: env {{{
 " Option: os {{{
@@ -90,7 +94,7 @@ endif
 " }}}
 
 " language and encoding
-set helplang=en,ja
+set helplang=ja,en
 set fileencodings=ucs-bom,utf-8,euc-jp,iso-2022-jp,cp932
 set fileformats=unix,mac,dos
 
@@ -98,9 +102,57 @@ set fileformats=unix,mac,dos
 set iminsert=0
 set imsearch=0
 
+" help {{{
 " Command: H {{{
 command! -nargs=? -complete=help H
 			\ h <args> | normal <C-w>L
+" }}}
+
+" Plugin: vim-ref {{{
+let ref_open = ':rightb vsplit'
+let ref_cache_dir = $dotvim . '/.vimref'
+
+" Function: s:init_vimref() {{{
+function! s:init_vimref()
+	nmap <buffer> b <Plug>(ref-back)
+	nmap <buffer> f <Plug>(ref-forward)
+	nnoremap <buffer> q <C-w>c
+endfunction
+" }}}
+" }}}
+" }}}
+
+" statusline {{{
+set laststatus=2
+set updatetime=60
+set statusline=%f\ %y%q
+set statusline+=%{'['.GetFencAndFF().']'}
+set statusline+=%w%m
+set statusline+=%<
+set statusline+=[%{WordCount()}]
+set statusline+=%=
+set statusline+=%04l,%04v\ %L*%P
+
+" Plugin: wordcount {{{
+exe 'source ' . expand($dotvim) . '/bundle/vim-wordcount/wordcount.vim'
+" }}}
+
+" Function: GetFencAndFF() {{{
+function! GetFencAndFF()
+	if			&fenc == 'utf-8'				| let fenc = 'u'
+	elseif	&fenc == 'euc-jp'				| let fenc = 'e'
+	elseif	&fenc == 'cp932'				| let fenc = 'c'
+	elseif	&fenc == 'iso-2022-jp'	| let fenc = 'i'
+	else | let fenc = '-' | endif
+
+	if			&ff == 'unix'	| let ff = 'u'
+	elseif	&ff == 'mac'	| let ff = 'm'
+	elseif	&ff == 'dos'	| let ff = 'w'
+	else | let ff = '-' | endif
+
+	return fenc . ff
+endfunction
+" }}}
 " }}}
 
 " Plugin: unite {{{
@@ -124,7 +176,7 @@ let quickrun_config._ = {
 			\ 'cmdopt'		: '%{b:cmdopt}',
 			\ 'args'			: '%{b:args}',
 			\ 'runner/vimproc/updatetime'	: 100,
-			\ 'outputter/buffer/split'		: 'rightb 8sp',
+			\ 'outputter/buffer/split'		: 'rightb 8split',
 			\ 'outputter/error/error'			: 'quickfix',
 			\ }
 
@@ -332,66 +384,59 @@ command! -nargs=? -complete=file Carm call ToggleCmapkeys(gdb_arm, '<args>')
 command! -nargs=* -complete=file Cargs Cset args <args>
 " }}}
 " }}}
-" }}}
 
-" Option: history {{{
-let &history = 1024 * 1024
-let $viminfo = $dotvim . '/.viminfo'
-set viminfo=!,%,'1024,c,h,n$viminfo
+" Command: DiffVimVer {{{
+" Function: s:diff_vim_ver() {{{
+function! s:diff_vim_ver(diffed)
+	if a:diffed == ''
+		let diffed = expand('~/bin/vim')
+	else
+		let diffed = expand(a:diffed)
+	endif
 
-" undo
-let &undolevels = 1024 * 1024
+	if !filereadable(diffed)
+		echoerr 'Not found: ' . diffed
+		return -1
+	endif
 
-" Feature: persistent_undo {{{
-if has('persistent_undo')
-	let &undodir = $dotvim . '/.undo'
-	set undofile
-endif
-" }}}
+	silent tabe current
+	silent read !vim --version
+	silent v/^\s*[+-].*/d
+	silent %s/\v([+-]{1,2}[0-9a-zA-Z_()]+)\s+\n*/\1\r/g
+	silent %!sort
+	set nomodified
+	diffthis
 
-" swap
-set swapfile
-set directory=$tmpdirs
-
-" backup
-set backup
-set backupdir=$tmpdirs
-
-" Plugin: poslist {{{
-let poslist_histsize = 1024 * 1024
-" }}}
-" }}}
-
-" Option: statusline {{{
-set laststatus=2
-set updatetime=60
-set statusline=%f\ %y%q
-set statusline+=%{'['.GetFencAndFF().']'}
-set statusline+=%w%m
-set statusline+=%<
-set statusline+=[%{WordCount()}]
-set statusline+=%=
-set statusline+=%04l,%04v\ %L*%P
-
-" Plugin: wordcount {{{
-exe 'source ' . expand($dotvim) . '/bundle/vim-wordcount/wordcount.vim'
-" }}}
-
-" Function: GetFencAndFF() {{{
-function! GetFencAndFF()
-	if			&fenc == 'utf-8'				| let fenc = 'u'
-	elseif	&fenc == 'euc-jp'				| let fenc = 'e'
-	elseif	&fenc == 'cp932'				| let fenc = 'c'
-	elseif	&fenc == 'iso-2022-jp'	| let fenc = 'i'
-	else | let fenc = '-' | endif
-
-	if			&ff == 'unix'	| let ff = 'u'
-	elseif	&ff == 'mac'	| let ff = 'm'
-	elseif	&ff == 'dos'	| let ff = 'w'
-	else | let ff = '-' | endif
-
-	return fenc . ff
+	silent rightb vert diffsplit diffed
+	silent exe 'read !' . diffed . ' --version'
+	silent v/^\s*[+-].*/d
+	silent %s/\v([+-]{1,2}[0-9a-zA-Z_()]+)\s+\n*/\1\r/g
+	silent %!sort
+	set nomodified
+	diffupdate
 endfunction
+" }}}
+
+command! -nargs=? DiffVimVer call s:diff_vim_ver('<args>')
+" }}}
+
+" Command: ShowColors {{{
+function! s:show_colors()
+	tabe colors
+
+	let num = 255
+
+	while num >= 0
+		exec 'hi col_' . num . ' ctermbg=' . num . ' ctermfg=white'
+		exec 'syn match col_' . num . ' "ctermbg='. num . ':..." containedIn=ALL'
+		call append(0, 'ctermbg=' . num . ':...')
+		set nomodified
+
+		let num -= 1
+	endwhile
+endfunction
+
+command! -nargs=0 ShowColors call s:show_colors()
 " }}}
 " }}}
 
@@ -419,7 +464,8 @@ runtime macros/matchit.vim
 " Plugin: YankRing {{{
 let yankring_max_history		= 16
 let yankring_window_height	= 11
-let yankring_manage_numbered_reg = 1
+let yankring_manage_numbered_reg		= 1
+let yankring_manual_clipboard_check = 0
 let yankring_history_dir	= $dotvim
 let yankring_history_file	= '.yankring'
 " }}}
@@ -486,6 +532,26 @@ if has('cscope')
 	endif
 endif
 " }}}
+
+" Plugin: QFixGrep {{{
+let QFix_UseLocationList = 0
+let QFix_CopenCmd = 'botright vert'
+let QFix_Width = 80
+let QFix_CursorLine = 0
+let QFix_CloseOnJump = 1
+let QFix_Edit = 'tab'
+
+let QFix_PreviewEnable = 1
+let QFix_PreviewExclude = '\.exe$\|\.out$'
+let QFix_PreviewOpenCmd = ''
+let QFix_PreviewHeight = 24
+let QFix_PreviewFtypeHighlight = 1
+let QFix_PreviewCursorLine = 1
+let QFix_PreviewWrap = 0
+
+let MyGrep_Key = ','
+let MyGrep_KeyB = 'q'
+" }}}
 " }}}
 
 " Option: completion {{{
@@ -538,11 +604,52 @@ command! -nargs=* NecoRSnip NeoComplCacheEditRuntimeSnippets <args>
 " }}}
 " }}}
 
+" Option: history {{{
+let &history = 1024 * 1024
+let $viminfo = $dotvim . '/.viminfo'
+set viminfo=!,%,'1024,c,h,n$viminfo
+
+" undo
+let &undolevels = 1024 * 1024
+
+" Feature: persistent_undo {{{
+if has('persistent_undo')
+	let &undodir = $dotvim . '/.undo'
+	set undofile
+endif
+" }}}
+
+" swap
+set swapfile
+set directory=$tmpdirs
+
+" backup
+set backup
+set backupdir=$tmpdirs
+
+" Plugin: poslist {{{
+let poslist_histsize = 1024 * 1024
+" }}}
+" }}}
+
 let mapleader = ','
 
 " Map: {{{
 nnoremap j gj
 nnoremap k gk
+
+" special keys {{{
+map		<Esc>OA <Up>
+map		<Esc>OB <Down>
+map		<Esc>OC <Right>
+map		<Esc>OD <Left>
+map		<Esc>OH 0
+map		<Esc>OF $
+cmap	<Esc>OH <C-a>
+cmap	<Esc>OF <C-e>
+imap	<Esc>OH 0
+imap	<Esc>OF $
+" }}}
 
 vnoremap < <gv
 vnoremap > >gv
@@ -552,11 +659,22 @@ nnoremap <C-w>e <C-w>=
 inoremap <Esc>			<Esc>:set iminsert=0<CR>
 nnoremap <ESC><ESC>	:noh<CR>
 
-" quick edit {{{
+nnoremap <Leader>vc :Calc<CR>
+nnoremap <Leader>vf :VimFiler<CR>
+nnoremap <Leader>vF :FullScreen<CR>
+nnoremap <Leader>vm :Make<Space>
+nnoremap <Leader>vs :w !sh<CR>
+nnoremap <Leader>vw :w sudo:%
+nnoremap <Leader>vx :set ft=xxd<CR>:%!xxd<CR>
+nnoremap <Leader>vX :%!xxd -r<CR>:e!<CR>
+" }}}
+
+" Map: quick-e {{{
 let $vimrc				= $dotfiles . '/_vimrc'
 let $gvimrc				= $dotfiles . '/_gvimrc'
-let $nodokarc			= $dotfiles . '/dot.nodoka'
 let $vimperatorrc	= $dotfiles . '/_vimperatorrc'
+let $nodokarc			= $dotfiles . '/dot.nodoka'
+let $zshrc				= $dotfiles . '/_zshrc'
 
 nnoremap <Leader>v		:e $vimrc<CR>
 nnoremap <Leader>vv		:vnew $vimrc<CR>
@@ -564,12 +682,15 @@ nnoremap <Leader>vV		:tabe $vimrc<CR>
 nnoremap <Leader>vg		:e $gvimrc<CR>
 nnoremap <Leader>vgg	:vnew $gvimrc<CR>
 nnoremap <Leader>vG		:tabe $gvimrc<CR>
-nnoremap <Leader>vn		:e $nodokarc<CR>
-nnoremap <Leader>vnn	:vnew $nodokarc<CR>
-nnoremap <Leader>vN		:tabe $nodokarc<CR>
 nnoremap <Leader>vp		:e $vimperatorrc<CR>
 nnoremap <Leader>vpp	:vnew $vimperatorrc<CR>
 nnoremap <Leader>vP		:tabe $vimperatorrc<CR>
+nnoremap <Leader>vn		:e $nodokarc<CR>
+nnoremap <Leader>vnn	:vnew $nodokarc<CR>
+nnoremap <Leader>vN		:tabe $nodokarc<CR>
+nnoremap <Leader>vz		:e $zshrc<CR>
+nnoremap <Leader>vzz	:vnew $zshrc<CR>
+nnoremap <Leader>vZ		:tabe $zshrc<CR>
 nnoremap <Leader>vt		:e `=tempname()`<CR>
 nnoremap <Leader>vT		:e `=strftime('%y%m%d-%H%M')`<CR>
 
@@ -580,16 +701,6 @@ nnoremap <Leader>:e :e %:h/
 nnoremap <Leader>:n :new %:h/
 nnoremap <Leader>:v :vnew %:h/
 nnoremap <Leader>:t :tabe %:h/
-" }}}
-
-nnoremap <Leader>vc :Calc<CR>
-nnoremap <Leader>vf :VimFiler<CR>
-nnoremap <Leader>vF :FullScreen<CR>
-nnoremap <Leader>vm :Make 
-nnoremap <Leader>vs :w !sh<CR>
-nnoremap <Leader>vw :w sudo:%
-nnoremap <Leader>vx :set ft=xxd<CR>:%!xxd<CR>
-nnoremap <Leader>vX :%!xxd -r<CR>:e!<CR>
 " }}}
 
 " Map: selection {{{
@@ -611,24 +722,28 @@ inoremap <expr> <C-r>:f expand('%:t')
 inoremap <expr> <C-r>:d expand('%:p:h')
 " }}}
 
+" Map: substitution {{{
+vnoremap <Leader>st :s/\t\+/ /g
+" }}}
+
 " Map: neobundle {{{
 nnoremap <Leader>vbi :NeoBundleInstall<CR>
-nnoremap <Leader>vbu :NeoBundleInstall! 
+nnoremap <Leader>vbu :NeoBundleInstall!<Space>
 nnoremap <Leader>vbc :NeoBundleClean<CR>
 nnoremap <Leader>vbd :NeoBundleDocs<CR>
 nnoremap <Leader>vbl :NeoBundleList<CR>
 " }}}
 
 " Map: unite {{{
-nnoremap <Leader>u		:Unite 
+nnoremap <Leader>u		:Unite<Space>
 nnoremap <Leader>uf		:Unite file<CR>
 nnoremap <Leader>ut		:Unite tag<CR>
 nnoremap <Leader>utt	:Unite tag<CR>
 nnoremap <Leader>utf	:Unite tag/file<CR>
-nnoremap <Leader>ur		:Unite ref 
+nnoremap <Leader>ur		:Unite ref<Space>
 nnoremap <Leader>urm	:Unite ref/man<CR>
-nnoremap <Leader>urpl	:Unite ref/perldoc<CR>
-nnoremap <Leader>urpy	:Unite ref/pydoc<CR>
+nnoremap <Leader>urp	:Unite ref/perldoc<CR>
+nnoremap <Leader>ury	:Unite ref/pydoc<CR>
 nnoremap <Leader>us		:Unite snippet<CR>
 nnoremap <Leader>uv		:Unite scriptnames<CR>
 " }}}
@@ -652,10 +767,17 @@ nnoremap <Leader>cS	:Csymcompletion<CR>
 nnoremap <Leader>cP	:Cproject <C-r>=strftime('%y%m%d')<CR>.gdb
 nnoremap <Leader>cq	:nbclose<CR>:bdelete (clewn)_console<CR>
 nnoremap <Leader>cs	:Csigint<CR>
-nnoremap <Leader>cp	:Cprint 
-nnoremap <Leader>cb	:Cbreak 
+nnoremap <Leader>cp	:Cprint<Space>
+nnoremap <Leader>cb	:Cbreak<Space>
 vnoremap <Leader>cp	"*y:<C-u>Cprint <C-r>*<CR>
 vnoremap <Leader>cb	"*y:<C-u>Cbreak <C-r>*<CR>
+" }}}
+
+" Map: vim-ref {{{
+map <Leader>vr	:Ref<Space>
+map <Leader>vrm	:Ref man<Space>
+map <Leader>vrp	:Ref perldoc<Space>
+map <Leader>vry	:Ref pydoc<Space>
 " }}}
 
 " Map: EasyMotion {{{
@@ -682,14 +804,14 @@ map # <Plug>(visualstar-#)N
 
 " Map: cscope {{{
 if has('cscope')
-	nnoremap <Leader>tf :cs find file 
-	nnoremap <Leader>ti :cs find include 
-	nnoremap <Leader>tt :cs find text 
-	nnoremap <Leader>te :cs find egrep 
-	nnoremap <Leader>ts :cs find symbol 
-	nnoremap <Leader>tg :cs find global 
-	nnoremap <Leader>tc :cs find calls 
-	nnoremap <Leader>td :cs find called 
+	nnoremap <Leader>tf :cs find file<Space>
+	nnoremap <Leader>ti :cs find include<Space>
+	nnoremap <Leader>tt :cs find text<Space>
+	nnoremap <Leader>te :cs find egrep<Space>
+	nnoremap <Leader>ts :cs find symbol<Space>
+	nnoremap <Leader>tg :cs find global<Space>
+	nnoremap <Leader>tc :cs find calls<Space>
+	nnoremap <Leader>td :cs find called<Space>
 endif
 " }}}
 
@@ -699,8 +821,8 @@ endif
 " " }}}
 
 " Map: neocomplcache {{{
-nnoremap <Leader>ns :NecoSnip 
-nnoremap <Leader>nS :NecoRSnip 
+nnoremap <Leader>ns :NecoSnip<Space>
+nnoremap <Leader>nS :NecoRSnip<Space>
 imap <C-k> <Plug>(neocomplcache_snippets_expand)
 smap <C-k> <Plug>(neocomplcache_snippets_expand)
 inoremap <expr> <C-g> neocomplcache#undo_completion()
@@ -716,7 +838,6 @@ inoremap <expr> <C-e> pumvisible() ? neocomplcache#cancel_popup() : "\<C-e>"
 " Augroup: {{{
 augroup noname
 	autocmd!
-	autocmd VimEnter * set ts=4 sw=4 fenc=utf-8 ff=unix nomod
 	autocmd BufNewFile,BufReadPost * setlocal ts=4 sw=4
 	autocmd VimEnter * cmap <C-w> <M-BS>
 	autocmd VimEnter *.snip setlocal filetype=snippet
@@ -734,8 +855,9 @@ augroup filetype
 	autocmd!
 	autocmd FileType * setlocal formatoptions-=ro
 	autocmd FileType help nnoremap <buffer> q <C-w>c
+	autocmd FileType ref call s:init_vimref()
 	autocmd FileType xml nnoremap <Leader>vf :%!xmllint --format -<CR>
-	autocmd FileTYpe xml vnoremap <Leader>vf :!xmllint --format -<CR>
+	autocmd FileType xml vnoremap <Leader>vf :!xmllint --format -<CR>
 augroup END
 " }}}
 
