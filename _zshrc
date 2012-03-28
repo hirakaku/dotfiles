@@ -26,7 +26,7 @@ export EDITOR='vim'
 # tmux {{{
 if [[ -e `which tmux` ]] then
 	if [[ -z $TMUX ]] then
-		if (tmux has-session) then
+		if [[ `tmux ls | grep -v 'attached' | wc -l` -gt 0 ]] then
 			tmux attach
 		else
 			tmux
@@ -42,34 +42,32 @@ unsetopt hist_beep
 # }}}
 
 # prompt {{{
-setopt prompt_subst
 autoload -Uz colors; colors
 
-PROMPT='%B'
-PROMPT+='%(!'
-PROMPT+='|%{$fg_bold[white]%}'
-PROMPT+='|%{$fg_bold[red]%})'
-PROMPT+='%n>'
-PROMPT+='%{$reset_color%}'
-PROMPT+='%b'
-PROMPT+=' '
-
-RPROMPT='%{$fg_bold[blue]%}'
-RPROMPT+='%d'
-RPROMPT+='%{$reset_color%}'
-RPROMPT+=':%!'
+setopt prompt_subst
 
 # vi-mode {{{
+psins='%{$fg_bold[red]%}%#%{$reset_color%} '
+pscmd='%{$bg_bold[red]%}%#%{$reset_color%} '
+
+PROMPT=$psins
+RPROMPT='%{$fg_bold[blue]%}%d%{$reset_color%}:%!'
+
 zle -N zle-line-init
 zle -N zle-keymap-select
 
 function zle-line-init zle-keymap-select
 {
-	if [[ $KEYMAP == vicmd ]] then
-		tput civis
-	else
-		tput cnorm
-	fi
+	case $KEYMAP in
+		viins|main)
+			PROMPT=$psins
+			;;
+		vicmd)
+			PROMPT=$pscmd
+			;;
+	esac
+
+	zle reset-prompt
 }
 # }}}
 # }}}
@@ -79,10 +77,6 @@ setopt auto_cd
 setopt auto_pushd
 setopt pushd_to_home
 setopt pushd_ignore_dups
-
-# cdpath {{{
-# cdpath=($cdpath $HOME)
-# }}}
 
 # name_dirs {{{
 setopt auto_name_dirs
@@ -115,6 +109,7 @@ setopt hist_find_no_dups
 
 # history-search-end {{{
 autoload history-search-end
+
 zle -N history-beginning-search-backward-end history-search-end
 zle -N history-beginning-search-forward-end history-search-end
 # }}}
@@ -122,6 +117,7 @@ zle -N history-beginning-search-forward-end history-search-end
 
 # completion {{{
 autoload -U compinit && compinit
+
 setopt list_packed
 setopt magic_equal_subst
 
@@ -158,6 +154,10 @@ zstyle ':completion:*:default' list-colors ${(s/:/)LS_COLORS}
 
 # bindkeys {{{
 bindkey -v
+
+# disable ^q and ^s
+stty start undef
+stty stop undef
 
 bindkey '^A' beginning-of-line
 bindkey '^E' end-of-line

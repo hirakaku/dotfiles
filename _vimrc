@@ -6,14 +6,14 @@ set nocompatible
 " Plugin: neobundle {{{
 filetype off
 
-" Script: dotvim {{{
-let $dotvim = expand('~/.vim')
-
+" Feature: vim_starting {{{
 if has('vim_starting')
-	set runtimepath+=$dotvim/bundle/neobundle.vim
-	let $ftplugin = '/usr/share/vim/vim73/ftplugin'
+	let $dotfiles	= expand('~/dotfiles')
+	let $dotvim = expand('~/.vim')
 	let $bundle = expand('$dotvim/bundle')
 	let $plugin = expand('$dotvim/plugin')
+
+	set runtimepath+=$dotvim/bundle/neobundle.vim
 	call neobundle#rc($bundle)
 endif
 " }}}
@@ -65,7 +65,10 @@ NeoBundle 'sudo.vim'
 " }}}
 
 " @ local {{{
-source $ftplugin/man.vim
+runtime ftplugin/man.vim
+runtime macros/matchit.vim
+
+source $dotvim/bundle/vim-wordcount/wordcount.vim
 source $plugin/textobj-fold.vim
 " }}}
 " }}}
@@ -79,12 +82,10 @@ syntax on
 if has('win32') || has('win64')
 	let $osname		= 'Windows'
 	let $winhome	= $HOMEDRIVE . $HOMEPATH
-	let $dotfiles	= $HOME . '/dotfiles'
 	let $tmpdirs	= $TEMP
 	let $msys			= $winhome . '/App/msys'
 else
 	let $osname		= system('uname')
-	let $dotfiles	= '~/dotfiles'
 	let $tmpdirs	= '~/tmp,/var/tmp,/tmp'
 	let $tct			= '~/dev/scqemu/test/tct'
 
@@ -112,10 +113,14 @@ command! -nargs=? -complete=help H
 let ref_open = ':rightb vsplit'
 let ref_cache_dir = $dotvim . '/.vimref'
 
+cnoreabbrev rman	Ref man
+cnoreabbrev rpl		Ref perldoc
+cnoreabbrev rpy		Ref pydoc
+
 " Function: s:init_vimref() {{{
 function! s:init_vimref()
-	nmap <buffer> b <Plug>(ref-back)
-	nmap <buffer> f <Plug>(ref-forward)
+	nnoremap <buffer> b <Plug>(ref-back)
+	nnoremap <buffer> f <Plug>(ref-forward)
 	nnoremap <buffer> q <C-w>c
 endfunction
 " }}}
@@ -125,17 +130,6 @@ endfunction
 " statusline {{{
 set laststatus=2
 set updatetime=60
-set statusline=%f\ %y%q
-set statusline+=%{'['.GetFencAndFF().']'}
-set statusline+=%w%m
-set statusline+=%<
-set statusline+=[%{WordCount()}]
-set statusline+=%=
-set statusline+=%04l,%04v\ %L*%P
-
-" Plugin: wordcount {{{
-source $dotvim/bundle/vim-wordcount/wordcount.vim
-" }}}
 
 " Function: GetFencAndFF() {{{
 function! GetFencAndFF()
@@ -153,6 +147,14 @@ function! GetFencAndFF()
 	return fenc . ff
 endfunction
 " }}}
+
+set statusline=%f\ %y%q
+set statusline+=%{'['.GetFencAndFF().']'}
+set statusline+=%w%m
+set statusline+=%<
+set statusline+=[%{WordCount()}]
+set statusline+=%=
+set statusline+=%04l,%04v\ %L*%P
 " }}}
 
 " Plugin: unite {{{
@@ -225,6 +227,7 @@ function! GetSIDs(file)
 
 	let sids = []
 	let spat = '\v\s*(\d+):\s*(.*)$'
+
 	let fpat = '\V'
 				\ . substitute(file, '\\', '/', 'g')
 				\ . '\v%(\.vim)?$'
@@ -255,7 +258,10 @@ endfunction
 
 " Function: Call() {{{
 function! Call(f, ...)
-	let [file, fnname] = (a:f =~# ':') ? split(a:f, ':') : [expand('%:p'), a:f]
+	let [file, fnname] = (a:f =~# ':')
+				\ ? split(a:f, ':')
+				\ : [expand('%:p'), a:f]
+
 	let sids = GetSIDs(file)
 
 	for sid in sids
@@ -273,9 +279,11 @@ endfunction
 " Function: Hook() {{{
 function! Hook(hooked, fn)
 	let fnpat = "^function('\\(.*\\)')$"
+
 	let hooked = (type(a:hooked) == 2)
 				\ ? substitute(string(a:hooked), fnpat, '\1', '')
 				\ : a:hooked
+
 	let fn = (type(a:fn) == 2)
 				\ ? substitute(string(a:fn), fnpat, '\1', '')
 				\ : a:fn
@@ -346,6 +354,7 @@ let gdb_arm = 'arm-linux-gnueabi-gdb'
 " Function: SetPyclewnArgs() {{{
 function! SetPyclewnArgs(gdb, project)
 	let g:pyclewn_gdb = a:gdb
+
 	let g:pyclewn_args =
 				\ '--gdb=async,' . a:project
 				\ . ' --pgm=' . g:pyclewn_gdb
@@ -450,6 +459,7 @@ set backspace=indent,eol,start
 " let indent_guides_enable_on_vim_startup = 1
 let indent_guides_guide_size	= 1
 let indent_guides_auto_colors	= 0
+
 highlight IndentGuidesOdd ctermbg=DarkRed
 highlight IndentGuidesEven ctermbg=DarkBlue
 " }}}
@@ -457,9 +467,6 @@ highlight IndentGuidesEven ctermbg=DarkBlue
 " parenthesis
 set showmatch
 set matchtime=3
-
-" matchit
-runtime macros/matchit.vim
 
 " Plugin: YankRing {{{
 let yankring_max_history		= 16
@@ -477,10 +484,11 @@ let showmarks_include = 'abcdefghijklmnopqrstuvwxyz'
 let showmarks_include .= 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
 " let showmarks_include .= ".'`^<>[]{}()\""
 let showmarks_ignore_name = 'hm'
-highlight ShowMarksHLl ctermfg=Red ctermbg=DarkGray
-highlight ShowMarksHLu ctermfg=Blue ctermbg=DarkGray
-highlight ShowMarksHLo ctermfg=Gray ctermbg=DarkGray
-highlight ShowMarksHLm ctermfg=White ctermbg=DarkGray
+
+highlight ShowMarksHLl ctermfg=Red ctermbg=Black
+highlight ShowMarksHLu ctermfg=Blue ctermbg=Black
+highlight ShowMarksHLo ctermfg=Gray ctermbg=Black
+highlight ShowMarksHLm ctermfg=White ctermbg=Black
 " }}}
 
 " Plugin: errormarker {{{
@@ -537,20 +545,20 @@ endif
 let QFix_UseLocationList = 0
 let QFix_CopenCmd = 'botright vert'
 let QFix_Width = 80
-let QFix_CursorLine = 0
-let QFix_CloseOnJump = 1
+let QFix_CursorLine		= 0
+let QFix_CloseOnJump	= 1
 let QFix_Edit = 'tab'
 
-let QFix_PreviewEnable = 1
-let QFix_PreviewExclude = '\.exe$\|\.out$'
-let QFix_PreviewOpenCmd = ''
-let QFix_PreviewHeight = 24
+let QFix_PreviewEnable	= 1
+let QFix_PreviewExclude	= '\.exe$\|\.out$'
+let QFix_PreviewOpenCmd	= ''
+let QFix_PreviewHeight	= 24
 let QFix_PreviewFtypeHighlight = 1
 let QFix_PreviewCursorLine = 1
 let QFix_PreviewWrap = 0
 
-let MyGrep_Key = '<Leader>'
-let MyGrep_KeyB = 'q'
+let MyGrep_Key	= '<Leader>'
+let MyGrep_KeyB	= 'q'
 " }}}
 " }}}
 
@@ -674,6 +682,7 @@ let $vimrc				= $dotfiles . '/_vimrc'
 let $gvimrc				= $dotfiles . '/_gvimrc'
 let $vimperatorrc	= $dotfiles . '/_vimperatorrc'
 let $nodokarc			= $dotfiles . '/dot.nodoka'
+let $tmuxrc				= $dotfiles . '/tmux.conf'
 let $zshrc				= $dotfiles . '/_zshrc'
 
 nnoremap <Leader>v		:e $vimrc<CR>
@@ -688,11 +697,19 @@ nnoremap <Leader>vP		:tabe $vimperatorrc<CR>
 nnoremap <Leader>vn		:e $nodokarc<CR>
 nnoremap <Leader>vnn	:vnew $nodokarc<CR>
 nnoremap <Leader>vN		:tabe $nodokarc<CR>
+nnoremap <Leader>vt		:e $tmuxrc<CR>
+nnoremap <Leader>vtt	:vnew $tmuxrc<CR>
+nnoremap <Leader>vT		:tabe $tmuxrc<CR>
 nnoremap <Leader>vz		:e $zshrc<CR>
 nnoremap <Leader>vzz	:vnew $zshrc<CR>
 nnoremap <Leader>vZ		:tabe $zshrc<CR>
-nnoremap <Leader>vt		:e `=tempname()`<CR>
-nnoremap <Leader>vT		:e `=strftime('%y%m%d-%H%M')`<CR>
+
+nnoremap <Leader>ve		:e `=tempname()`<CR>
+nnoremap <Leader>vee	:vnew `=tempname()`<CR>
+nnoremap <Leader>vE		:tabe `=tempname()`<CR>
+nnoremap <Leader>vi		:e `=strftime('%y%m%d-%H%M')`<CR>
+nnoremap <Leader>vii	:vnew `=strftime('%y%m%d-%H%M')`<CR>
+nnoremap <Leader>vI		:tabe `=strftime('%y%m%d-%H%M')`<CR>
 
 nnoremap <Leader>V		:so %<CR>
 nnoremap <Leader>Vh		:so $VIMRUNTIME/syntax/hitest.vim<CR>
@@ -771,13 +788,6 @@ nnoremap <Leader>cp	:Cprint<Space>
 nnoremap <Leader>cb	:Cbreak<Space>
 vnoremap <Leader>cp	"*y:<C-u>Cprint <C-r>*<CR>
 vnoremap <Leader>cb	"*y:<C-u>Cbreak <C-r>*<CR>
-" }}}
-
-" Map: vim-ref {{{
-map <Leader>vr	:Ref<Space>
-map <Leader>vrm	:Ref man<Space>
-map <Leader>vrp	:Ref perldoc<Space>
-map <Leader>vry	:Ref pydoc<Space>
 " }}}
 
 " Map: EasyMotion {{{

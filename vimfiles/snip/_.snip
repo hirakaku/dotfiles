@@ -1,6 +1,14 @@
 # File:		dotfiles/vimfiles/snip/_.snip
 # Author:	hirakaku <hirakaku@gmail.com>
 
+snippet footer#
+prev_word '^'
+    # vim: ts=${1:4} sw=${2:4} ff=${3:unix} fdm=${4:marker}:
+
+snippet footer*
+prev_word '^'
+    /* vim: ts=${1:4} sw=${2:4} ff=${3:unix} fdm=${4:marker}: */
+
 snippet header#
 prev_word '^'
     # File:		${1:`expand('%')`}
