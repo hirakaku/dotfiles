@@ -53,15 +53,13 @@ NeoBundle 'tpope/vim-surround'
 NeoBundle 'tpope/vim-unimpaired'
 NeoBundle 'tsukkee/unite-tag'
 NeoBundle 'vim-jp/vimdoc-ja'
+NeoBundle 'vim-scripts/DirDiff.vim'
+NeoBundle 'vim-scripts/errormarker.vim'
+NeoBundle 'vim-scripts/Quich-Filter'
 NeoBundle 'vim-scripts/ShowMarks'
+NeoBundle 'vim-scripts/sudo.vim'
+" NeoBundle 'vim-scripts/YankRing.vim'
 NeoBundle 'zhaocai/unite-scriptnames'
-" }}}
-
-" @ vim-scripts {{{
-" NeoBundle 'YankRing.vim'
-NeoBundle 'DirDiff.vim'
-NeoBundle 'errormarker.vim'
-NeoBundle 'sudo.vim'
 " }}}
 
 " @ local {{{

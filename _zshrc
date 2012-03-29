@@ -21,6 +21,16 @@ export LANG='en_US.UTF-8'
 export TERM='xterm-256color'
 export SHELL='/bin/zsh'
 export EDITOR='vim'
+
+# LESS {{{
+LESS='--tabs=4'
+LESS+=' --clear-screen'
+LESS+=' --RAW-CONTROL-CHARS'
+LESS+=' --LONG-PROMPT'
+LESS+=' --IGNORE-CASE'
+
+export LESS
+# }}}
 # }}}
 
 # tmux {{{
@@ -35,6 +45,13 @@ if [[ -e `which tmux` ]] then
 fi
 # }}}
 
+# autoloads {{{
+autoload -Uz add-zsh-hook
+autoload -Uz colors; colors
+autoload -Uz compinit; compinit
+autoload -Uz history-search-end
+# }}}
+
 # beep {{{
 unsetopt beep
 unsetopt list_beep
@@ -42,8 +59,6 @@ unsetopt hist_beep
 # }}}
 
 # prompt {{{
-autoload -Uz colors; colors
-
 setopt prompt_subst
 
 # vi-mode {{{
@@ -59,7 +74,7 @@ zle -N zle-keymap-select
 function zle-line-init zle-keymap-select
 {
 	case $KEYMAP in
-		viins|main)
+		main|viins)
 			PROMPT=$psins
 			;;
 		vicmd)
@@ -85,6 +100,38 @@ setopt cdable_vars
 dev=$HOME/dev
 dot=$HOME/dotfiles
 # }}}
+
+# cdd {{{
+function _set_tmuxpwd()
+{
+	if [[ -n '$TMUX' ]] then
+		tmux setenv $(tmux display -p 'TMUX_PWD_#I') $PWD
+		tmux setenv $(tmux display -p 'TMUX_PWD_#I_#P') $PWD
+	fi
+}
+
+add-zsh-hook chpwd _set_tmuxpwd
+
+function cdd()
+{
+	case $# in
+		0 ) tmux display -p '(winidx, paneidx) = (#I, #P)'
+				tmux showenv | grep --color=never 'TMUX_PWD_'
+				return
+				;;
+		1 ) p="^TMUX_PWD_$1=";;
+		2 ) p="^TMUX_PWD_$1_$2=";;
+		* ) echo 'usage: cdd [winidx] [paneidx]'; return;;
+	esac
+
+	dir=`tmux showenv | grep --color=never $p | cut -d= -f2`
+
+	read -q "yn?cd to [$dir]? "
+	echo
+
+	if [[ $yn == 'y' ]] then; cd $dir; fi
+}
+# }}}
 # }}}
 
 # history {{{
@@ -108,16 +155,12 @@ setopt hist_find_no_dups
 # }}}
 
 # history-search-end {{{
-autoload history-search-end
-
 zle -N history-beginning-search-backward-end history-search-end
 zle -N history-beginning-search-forward-end history-search-end
 # }}}
 # }}}
 
 # completion {{{
-autoload -U compinit && compinit
-
 setopt list_packed
 setopt magic_equal_subst
 
@@ -159,10 +202,17 @@ bindkey -v
 stty start undef
 stty stop undef
 
-bindkey '^A' beginning-of-line
-bindkey '^E' end-of-line
-bindkey 'OH' beginning-of-line
-bindkey 'OF' end-of-line
+bindkey '^A'		beginning-of-line
+bindkey '^E'		end-of-line
+bindkey 'OH'	beginning-of-line
+bindkey 'OF'	end-of-line
+bindkey '[1~'	beginning-of-line
+bindkey '[4~'	end-of-line
+
+bindkey '^Q'		undefined-key
+bindkey '^H'		backward-delete-char
+bindkey '^W'		backward-kill-word
+bindkey '^U'		backward-kill-line
 
 bindkey '^P' history-beginning-search-backward
 bindkey '^N' history-beginning-search-forward
@@ -176,6 +226,11 @@ alias rc='e $zshrc'
 alias so='source $zshrc'
 alias zsh='exec zsh'
 
+# map and imap are equivalent
+alias map='bindkey -M main'
+alias imap='bindkey -M viins'
+alias cmap='bindkey -M vicmd'
+
 # globals {{{
 alias -g C='| column'
 alias -g M='| more'
@@ -183,7 +238,11 @@ alias -g L='| less'
 alias -g H='| head'
 alias -g T='| tail'
 alias -g G='| grep'
+alias -g E='| grep -E'
 alias -g V='| vim -'
+
+alias -g U='--help | head'
+alias -g I='--help | less'
 # }}}
 
 # apt {{{
@@ -199,18 +258,14 @@ alias up='cd ..'
 # }}}
 
 # ls {{{
-alias ls='ls --color=always -F'
+alias ls='ls --color=auto -F'
 alias la='ls -a'
 alias ll='ls -l'
 alias lm='ls -altr'
 # }}}
 
-# less {{{
-alias less='less -R'
-# }}}
-
 # grep {{{
-alias grep='grep --color=always'
+alias grep='grep --color=auto'
 # }}}
 # }}}
 
