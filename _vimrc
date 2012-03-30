@@ -155,6 +155,12 @@ set statusline+=%=
 set statusline+=%04l,%04v\ %L*%P
 " }}}
 
+" Feature: quickfix {{{
+if has('quickfix')
+	cnoreabbrev vcope rightb cope 80
+endif
+" }}}
+
 " Plugin: unite {{{
 let unite_data_directory = $dotvim . '/.unite'
 " }}}
@@ -309,11 +315,11 @@ endfunction
 " :Hook A B
 " :call A() => Hello, B!
 function! A()
-	echo "Hello, A!"
+	echo 'Hello, A!'
 endfunction
 
 function! B()
-	echo "Hello, B!"
+	echo 'Hello, B!'
 endfunction
 " }}}
 " }}}
@@ -547,10 +553,10 @@ let QFix_CursorLine		= 0
 let QFix_CloseOnJump	= 1
 let QFix_Edit = 'tab'
 
-let QFix_PreviewEnable	= 1
+let QFix_PreviewEnable	= 0
 let QFix_PreviewExclude	= '\.exe$\|\.out$'
 let QFix_PreviewOpenCmd	= ''
-let QFix_PreviewHeight	= 24
+let QFix_PreviewHeight	= 16
 let QFix_PreviewFtypeHighlight = 1
 let QFix_PreviewCursorLine = 1
 let QFix_PreviewWrap = 0

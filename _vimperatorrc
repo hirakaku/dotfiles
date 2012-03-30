@@ -14,6 +14,12 @@ set visualbell
 highlight Bell display: none;
 " }}}
 
+" Command: {{{
+command! evernote js evernote_doAction()
+command! clearly	js __readable_by_evernote.readable_by_evernote__button__call()
+command! cclip		js __readable_by_evernote.__readable_by_evernote__launch(buffer.URL)
+" }}}
+
 " Map: {{{
 let mapleader = ','
 
@@ -34,6 +40,33 @@ nnoremap <Leader>V :mapc<CR>:so ~/.vimperatorrc<CR>
 nnoremap <Leader>i :js modes.passAllKeys = true<CR>
 " }}}
 
-echo '.vimperatorrc was sourced'
+" UserMap: {{{
+javascript << EOF
+	mappings.addUserMap(
+		[modes.COMMAND_LINE],
+		['<C-t>'],
+		'toggle visibility of completion list',
+		function()
+		{
+			let list = commandline._completions.itemList;
+			list.visible() ? list.hide() : list.show();
+		});
+EOF
+
+javascript << EOF
+	mappings.addUserMap(
+		[modes.COMMAND_LINE],
+		['<C-g>'],
+		'adjust height of completion list',
+		function()
+		{
+			let list = commandline._completions.itemList;
+			list._minHeight = 0;
+			list._autoSize();
+		});
+EOF
+" }}}
+
+echo '_vimperatorrc was sourced'
 
 " vim: ft=vim ts=2 sw=2 ff=unix fdm=marker:
