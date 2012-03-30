@@ -28,6 +28,7 @@ NeoBundle 'kana/vim-smartchr'
 NeoBundle 'kana/vim-textobj-indent'
 NeoBundle 'kana/vim-textobj-lastpat'
 NeoBundle 'kana/vim-textobj-user'
+NeoBundle 'koron/chalice'
 NeoBundle 'Lokaltog/vim-easymotion'
 NeoBundle 'nathanaelkane/vim-indent-guides'
 NeoBundle 'Shougo/echodoc'
@@ -81,7 +82,11 @@ if has('win32') || has('win64')
 	let $osname		= 'Windows'
 	let $winhome	= $HOMEDRIVE . $HOMEPATH
 	let $tmpdirs	= $TEMP
-	let $msys			= $winhome . '/App/msys'
+	let $msys			= $HOME . '/app/msys'
+
+	set shell=$msys/bin/sh.exe\ --login
+	set shellcmdflag=-c
+	set shellxquote=\"
 else
 	let $osname		= system('uname')
 	let $tmpdirs	= '~/tmp,/var/tmp,/tmp'
@@ -220,6 +225,80 @@ let quickrun_config['c.tct']		= quickrun_config.tct
 let quickrun_config['asm.tct']	= quickrun_config.tct
 " }}}
 
+" Plugin: Pyclewn {{{
+let gdb_i386 = 'gdb'
+let gdb_arm = 'arm-linux-gnueabi-gdb'
+
+" Function: SetPyclewnArgs() {{{
+function! SetPyclewnArgs(gdb, project)
+	let g:pyclewn_gdb = a:gdb
+
+	let g:pyclewn_args =
+				\ '--gdb=async,' . a:project
+				\ . ' --pgm=' . g:pyclewn_gdb
+				\ . ' --window=top'
+				\ . ' --maxlines=' . 1024 * 1024
+				\ . ' --background=Cyan,Green,Magenta'
+endfunction
+" }}}
+
+" Function: ToggleCmapkeys {{{
+function! ToggleCmapkeys(gdb, project)
+	if !has('netbeans_enabled')
+		call SetPyclewnArgs(a:gdb, a:project)
+		Pyclewn
+		let g:pyclewn_mapped = 1 | Cmapkeys
+	else
+		if a:gdb != g:pyclewn_gdb || a:project != ''
+			unlet g:pyclewn_mapped | nbclose
+			call ToggleCmapkeys(a:gdb, a:project)
+		else
+			if g:pyclewn_mapped
+				echo ':Cunmapkeys'
+				let g:pyclewn_mapped = 0 | Cunmapkeys
+			else
+				echo ':Cmapkeys'
+				let g:pyclewn_mapped = 1 | Cmapkeys
+			endif
+		endif
+	endif
+endfunction
+" }}}
+
+" Command: Cargs {{{
+command! -nargs=? -complete=file Ci386 call ToggleCmapkeys(gdb_i386, '<args>')
+command! -nargs=? -complete=file Carm call ToggleCmapkeys(gdb_arm, '<args>')
+command! -nargs=* -complete=file Cargs Cset args <args>
+" }}}
+" }}}
+
+" Command: Make {{{
+" Function: FindBuild() {{{
+function! FindBuild(dir)
+	let dir = expand(a:dir)
+
+	while dir != '/' && stridx(dir, '/') != -1
+		let build = dir . '/build'
+
+		if isdirectory(build)
+			return build
+		endif
+
+		let dir = fnamemodify(dir, ':h')
+	endwhile
+
+	return ''
+endfunction
+" }}}
+
+command! -nargs=? Make
+			\ let b:build_dir = FindBuild(getcwd()) |
+			\ | if b:build_dir != ''
+				\ | echo b:build_dir
+				\ | exe 'make -C ' . b:build_dir . ' <args>'
+				\ | endif
+" }}}
+
 " Command: Call, Hook {{{
 " Function: GetSIDs() {{{
 function! GetSIDs(file)
@@ -321,80 +400,6 @@ endfunction
 function! B()
 	echo 'Hello, B!'
 endfunction
-" }}}
-" }}}
-
-" Command: Make {{{
-" Function: FindBuild() {{{
-function! FindBuild(dir)
-	let dir = expand(a:dir)
-
-	while dir != '/' && stridx(dir, '/') != -1
-		let build = dir . '/build'
-
-		if isdirectory(build)
-			return build
-		endif
-
-		let dir = fnamemodify(dir, ':h')
-	endwhile
-
-	return ''
-endfunction
-" }}}
-
-command! -nargs=? Make
-			\ let b:build_dir = FindBuild(getcwd()) |
-			\ | if b:build_dir != ''
-				\ | echo b:build_dir
-				\ | exe 'make -C ' . b:build_dir . ' <args>'
-				\ | endif
-" }}}
-
-" Plugin: Pyclewn {{{
-let gdb_i386 = 'gdb'
-let gdb_arm = 'arm-linux-gnueabi-gdb'
-
-" Function: SetPyclewnArgs() {{{
-function! SetPyclewnArgs(gdb, project)
-	let g:pyclewn_gdb = a:gdb
-
-	let g:pyclewn_args =
-				\ '--gdb=async,' . a:project
-				\ . ' --pgm=' . g:pyclewn_gdb
-				\ . ' --window=top'
-				\ . ' --maxlines=' . 1024 * 1024
-				\ . ' --background=Cyan,Green,Magenta'
-endfunction
-" }}}
-
-" Function: ToggleCmapkeys {{{
-function! ToggleCmapkeys(gdb, project)
-	if !has('netbeans_enabled')
-		call SetPyclewnArgs(a:gdb, a:project)
-		Pyclewn
-		let g:pyclewn_mapped = 1 | Cmapkeys
-	else
-		if a:gdb != g:pyclewn_gdb || a:project != ''
-			unlet g:pyclewn_mapped | nbclose
-			call ToggleCmapkeys(a:gdb, a:project)
-		else
-			if g:pyclewn_mapped
-				echo ':Cunmapkeys'
-				let g:pyclewn_mapped = 0 | Cunmapkeys
-			else
-				echo ':Cmapkeys'
-				let g:pyclewn_mapped = 1 | Cmapkeys
-			endif
-		endif
-	endif
-endfunction
-" }}}
-
-" Command: Cargs {{{
-command! -nargs=? -complete=file Ci386 call ToggleCmapkeys(gdb_i386, '<args>')
-command! -nargs=? -complete=file Carm call ToggleCmapkeys(gdb_arm, '<args>')
-command! -nargs=* -complete=file Cargs Cset args <args>
 " }}}
 " }}}
 
@@ -543,6 +548,10 @@ if has('cscope')
 		cscope add $CSCOPE_DB
 	endif
 endif
+" }}}
+
+" Plugin: Quich-Filter {{{
+let filteringDefaultContextLines = 0
 " }}}
 
 " Plugin: QFixGrep {{{
@@ -767,6 +776,10 @@ nnoremap <Leader>urp	:Unite ref/perldoc<CR>
 nnoremap <Leader>ury	:Unite ref/pydoc<CR>
 nnoremap <Leader>us		:Unite snippet<CR>
 nnoremap <Leader>uv		:Unite scriptnames<CR>
+nnoremap <Leader>un		:Unite neobundle<CR>
+nnoremap <Leader>unn	:Unite neobundle<CR>
+nnoremap <Leader>uni	:Unite neobundle/install:
+nnoremap <Leader>unl	:Unite neobundle/log<CR>
 " }}}
 
 " Map: fugitive {{{
@@ -829,6 +842,33 @@ if has('cscope')
 endif
 " }}}
 
+" Map: Quich-Filter {{{
+" Function: s:filtering() {{{
+function! s:filtering()
+	let obj = FilteringNew()
+	call obj.addToParameter('alt', @/)
+	call obj.run()
+endfunction
+" }}}
+
+" Function: s:filtering_input() {{{
+function! s:filtering_input()
+	let obj = FilteringNew()
+	let query = input('> ')
+
+	if empty(query) | return | endif
+
+	call obj.parseQuery(query, '|')
+	call obj.run()
+endfunction
+" }}}
+
+nnoremap <Leader>f	:call <SID>filtering()<CR>
+nnoremap <Leader>ff :call <SID>filtering()<CR>
+nnoremap <Leader>fi	:call <SID>filtering_input()<CR>
+nnoremap <Leader>fr :call FilteringGetForSource().return()<CR>
+" }}}
+
 " " Map: smartchr {{{
 " inoremap <expr> = smartchr#loop(' = ', '=', ' == ')
 " inoremap <expr> , smartchr#one_of(', ', ',')
@@ -868,6 +908,9 @@ augroup END
 augroup filetype
 	autocmd!
 	autocmd FileType * setlocal formatoptions-=ro
+	autocmd FileType vim if &buftype == 'nofile'
+				\ | nnoremap <buffer> q <C-w>c
+				\ | endif
 	autocmd FileType help nnoremap <buffer> q <C-w>c
 	autocmd FileType ref call s:init_vimref()
 	autocmd FileType xml nnoremap <Leader>vf :%!xmllint --format -<CR>
@@ -892,4 +935,4 @@ augroup neocomplcache
 augroup END
 " }}}
 
-" vim: ts=2 sw=2 ff=unix fdm=marker:
+" vim: ts=2 sw=2 fdm=marker:
