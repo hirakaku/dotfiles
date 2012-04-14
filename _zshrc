@@ -232,7 +232,7 @@ alias imap='bindkey -M viins'
 alias cmap='bindkey -M vicmd'
 
 # globals {{{
-alias -g C='| column'
+alias -g C='| copy'
 alias -g M='| more'
 alias -g L='| less'
 alias -g H='| head'
@@ -240,6 +240,7 @@ alias -g T='| tail'
 alias -g G='| grep'
 alias -g E='| grep -E'
 alias -g V='| vim -'
+alias -g X='| xargs -I{}'
 
 alias -g U='--help | head'
 alias -g I='--help | less'
@@ -248,9 +249,14 @@ alias -g I='--help | less'
 # apt {{{
 alias aps='apt-cache search'
 alias apf='apt-file search'
+alias apstall='sudo apt-get install'
 alias apdate='sudo apt-get update'
 alias apgrade='sudo apt-get upgrade'
-alias apstall='sudo apt-get install'
+# }}}
+
+# gem {{{
+alias gestall='sudo gem install'
+alias gedate='sudo gem update'
 # }}}
 
 # cd {{{
@@ -266,6 +272,11 @@ alias lm='ls -altr'
 
 # grep {{{
 alias grep='grep --color=auto'
+# }}}
+
+# xsel {{{
+alias copy='xsel --input --clipboard'
+alias paste='xsel --output --clipboard'
 # }}}
 # }}}
 

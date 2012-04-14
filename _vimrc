@@ -24,11 +24,11 @@ NeoBundle 'fuenor/vim-wordcount'
 NeoBundle 'gregsexton/VimCalc'
 NeoBundle 'guns/xterm-color-table.vim'
 NeoBundle 'houtsnip/vim-emacscommandline'
+" NeoBundle 'kakkyz81/evervim'
 NeoBundle 'kana/vim-smartchr'
 NeoBundle 'kana/vim-textobj-indent'
 NeoBundle 'kana/vim-textobj-lastpat'
 NeoBundle 'kana/vim-textobj-user'
-NeoBundle 'koron/chalice'
 NeoBundle 'Lokaltog/vim-easymotion'
 NeoBundle 'nathanaelkane/vim-indent-guides'
 NeoBundle 'Shougo/echodoc'
@@ -270,6 +270,16 @@ command! -nargs=? -complete=file Ci386 call ToggleCmapkeys(gdb_i386, '<args>')
 command! -nargs=? -complete=file Carm call ToggleCmapkeys(gdb_arm, '<args>')
 command! -nargs=* -complete=file Cargs Cset args <args>
 " }}}
+" }}}
+
+" Plugin: evervim {{{
+let evervim_workdir		= $dotvim . '/.evervim'
+let evervim_sortnotes	= 'updated desc'
+let evervim_sortbooks	= 'name asc'
+let evervim_sorttags	= 'name asc'
+let evervim_hidexmlheader = 1
+let evervim_removeemptylineonxml = 1
+let evervim_xmlindent = '	'
 " }}}
 
 " Command: Make {{{
@@ -556,22 +566,22 @@ let filteringDefaultContextLines = 0
 
 " Plugin: QFixGrep {{{
 let QFix_UseLocationList = 0
-let QFix_CopenCmd = 'botright vert'
-let QFix_Width = 80
-let QFix_CursorLine		= 0
-let QFix_CloseOnJump	= 1
+let QFix_CopenCmd = ''
+let QFix_Width = 0
+let QFix_CursorLine		= 1
+let QFix_CloseOnJump	= 0
 let QFix_Edit = 'tab'
 
 let QFix_PreviewEnable	= 0
 let QFix_PreviewExclude	= '\.exe$\|\.out$'
 let QFix_PreviewOpenCmd	= ''
-let QFix_PreviewHeight	= 16
+let QFix_PreviewHeight = 0
 let QFix_PreviewFtypeHighlight = 1
 let QFix_PreviewCursorLine = 1
 let QFix_PreviewWrap = 0
 
-let MyGrep_Key	= '<Leader>'
-let MyGrep_KeyB	= 'q'
+let MyGrep_Key	= 'g'
+let MyGrep_KeyB	= '<Leader>'
 " }}}
 " }}}
 
@@ -807,6 +817,14 @@ vnoremap <Leader>cp	"*y:<C-u>Cprint <C-r>*<CR>
 vnoremap <Leader>cb	"*y:<C-u>Cbreak <C-r>*<CR>
 " }}}
 
+" Map: evervim {{{
+nnoremap <Leader>es	:EvervimSetup<CR>
+nnoremap <Leader>en	:EvervimCreateNote<CR>
+nnoremap <Leader>el	:EvervimNotebookList<CR>
+nnoremap <Leader>et	:EvervimListTags<CR>
+nnoremap <Leader>e/	:EvervimSearhByQuery 
+" }}}
+
 " Map: EasyMotion {{{
 let EasyMotion_leader_key = '_'
 nnoremap __ _
@@ -895,12 +913,12 @@ augroup noname
 	autocmd BufNewFile,BufReadPost * setlocal ts=4 sw=4
 	autocmd VimEnter * cmap <C-w> <M-BS>
 	autocmd VimEnter *.snip setlocal filetype=snippet
-	autocmd BufReadPost ~/dev/linux-stable/*
-				\ set path^=~/dev/linux-stable/include
 	autocmd BufReadPost *
 				\ if line("'\"") > 1 && line("'\"") <= line('$')
 				\ | exe "normal! g`\""
 				\ | endif
+	autocmd BufReadPost ~/dev/linux-stable/*
+				\ set path^=~/dev/linux-stable/include
 augroup END
 " }}}
 
