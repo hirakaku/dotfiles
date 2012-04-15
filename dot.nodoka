@@ -32,7 +32,7 @@ key *Hiragana	= &Ignore
 key M0-F5 = &HelpMessage("nodoka", "reload setting\ndotfiles") \
 	&LoadSetting("home")
 
-key M0-F6 = &HelpMessage("nodoka", "show log") \
+key M0-F6 = &HelpMessage("nodoka", "menu") \
 	&SendPostMessage(PostTray,, "‚Ì‚Ç‚©", 0x205, 0x0, 0x0)
 
 key M0-F7 = &HelpMessage("nodoka", "show binds") \
@@ -140,18 +140,21 @@ key *IC-M0-M1-*S-k = *S-PageUp
 # }}}
 
 # mouse-control {{{
-key M0-D-~R-q	= D-LButton
-key M0-D-R-q	= &Ignore
-key M0-U-q		= U-LButton
+key M0-*C-*S-D-~R-q	= *C-*S-D-LButton
+key M0-*C-*S-D-R-q	= &Ignore
+key M0-*C-*S-U-q	= *C-*S-U-LButton
 
-key M0-D-~R-M-q	= D-RButton
-key M0-D-R-M-q	= &Ignore
-key M0-U-M-q	= U-RButton
+key M0-A-D-~R-q	= S-D-LButton
+key M0-A-D-R-q	= &Ignore
+key M0-A-U-q	= S-U-LButton
 
-key M0-~R-Tab	= &HelpMessage("scroller", "x12") &MouseHook(Wheel, -12)
-key M0-A-~R-Tab	= &HelpMessage("scroller", "x3") &MouseHook(Wheel, -3)
-key M0-*A-R-Tab	= &Ignore
-key M0-*A-U-Tab	= &HelpMessage &MouseHook(None, 0)
+key M0-*C-*S-D-~R-Tab	= *C-*S-D-RButton
+key M0-*C-*S-D-R-Tab	= &Ignore
+key M0-*C-*S-U-Tab		= *C-*S-U-RButton
+
+key M0-A-D-~R-Tab	= &HelpMessage("scroller", "x12") &MouseHook(Wheel, -12)
+key M0-A-D-R-Tab	= &Ignore
+key M0-A-U-Tab		= &HelpMessage &MouseHook(None, 0)
 
 key M2-k = WheelForward
 key M2-j = WheelBackward
@@ -211,6 +214,7 @@ key M2-v = &HelpMessage("foregrounding", "vim") \
 	&SetForegroundWindow(/Vim/)
 # }}}
 
+key M2-Tab	= M-Tab
 key M2-q	= &WindowClose
 key M2-r	= &WindowMaximize
 key M2-S-r	= &WindowMinimize
@@ -225,11 +229,24 @@ key M2-S-a = &WindowMonitorTo(current, -1, true, true)
 key M2-S-s = &WindowHMaximize
 key M2-S-d = &WindowMonitorTo(current, 1, true, true)
 # }}}
+
+# searchit {{{
+key M0-A-c = C-c &Sync &HelpMessage("searchit (google_jp)", $Clipboard) \
+	&PlugIn("searchit", "google_jp", $Clipboard, true)
+# }}}
 # }}}
 # }}}
 
 window virtualbox /VirtualBox\.exe/ : global # {{{
 key M0-PrintScreen = RightControl PrintScreen
+key M2-Tab = RightControl A-Tab
+
+key M2-q	= A-F4
+key M2-S-q	= &WindowClose
+key M2-r	= A-F10
+key M2-S-r	= &WindowMaximize
+key W-d		= C-A-d
+key W-S-d	= W-d
 # }}}
 
 # invalidation {{{
