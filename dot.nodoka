@@ -214,10 +214,10 @@ key M2-v = &HelpMessage("foregrounding", "vim") \
 	&SetForegroundWindow(/Vim/)
 # }}}
 
-key M2-Tab	= M-Tab
-key M2-q	= &WindowClose
-key M2-r	= &WindowMaximize
-key M2-S-r	= &WindowMinimize
+key M2-*S-Tab	= A-*S-Tab
+key M2-q		= &WindowClose
+key M2-r		= &WindowMaximize
+key M2-S-r		= &WindowMinimize
 
 key M2-w = &WindowMove(0, -32)
 key M2-a = &WindowMove(-32, 0)
@@ -239,7 +239,7 @@ key M0-A-c = C-c &Sync &HelpMessage("searchit (google_jp)", $Clipboard) \
 
 window virtualbox /VirtualBox\.exe/ : global # {{{
 key M0-PrintScreen = RightControl PrintScreen
-key M2-Tab = RightControl A-Tab
+key M2-*S-Tab = RightControl A-*S-Tab
 
 key M2-q	= A-F4
 key M2-S-q	= &WindowClose
