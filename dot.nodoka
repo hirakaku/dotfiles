@@ -169,65 +169,68 @@ key M0-A-R-_2	= &Ignore
 
 # window-control {{{
 # launcher {{{
-key M2-S-e = &HelpMessage("launcher", "explorer") \
-	&ShellExecute(open, "explorer.exe", "%HOME%",, ShowNormal)
+key M2-S-_1 = &HelpMessage("launcher", "vim") \
+	&ShellExecute( \
+		open, \
+		"C:/Users/hirakaku/Dropbox/app/vim/gvim.exe",,, \
+		ShowNormal)
 
-key M2-S-z = &HelpMessage("launcher", "word") \
+key M2-S-_2 = &HelpMessage("launcher", "word") \
 	&ShellExecute( \
 		open, \
 		"C:/Program Files (x86)/Microsoft Office/Office14/WINWORD.EXE",,, \
 		ShowNormal)
 
-key M2-S-x = &HelpMessage("launcher", "virtualbox") \
-	&ShellExecute( \
-	open, \
-	"C:/Program Files/Oracle/VirtualBox/VirtualBox.exe",,, \
-	ShowNormal)
-
-key M2-S-c = &HelpMessage("launcher", "firefox") \
+key M2-S-_3 = &HelpMessage("launcher", "firefox") \
 	U-LeftShift &Sync &ShellExecute( \
 		open, \
 		"C:/Program Files (x86)/Mozilla Firefox/firefox.exe",,, \
 		ShowNormal)
 
-key M2-S-v = &HelpMessage("launcher", "vim") \
+key M2-S-_4 = &HelpMessage("launcher", "virtualbox") \
 	&ShellExecute( \
-		open, \
-		"C:/Users/hirakaku/Dropbox/app/vim/gvim.exe",,, \
-		ShowNormal)
+	open, \
+	"C:/Program Files/Oracle/VirtualBox/VirtualBox.exe",,, \
+	ShowNormal)
+
+key M2-S-e = &HelpMessage("launcher", "explorer") \
+	&ShellExecute(open, "explorer.exe", "%HOME%",, ShowNormal)
 # }}}
 
 # foregrounding {{{
-key M2-e = &HelpMessage("foregrounding", "explorer") \
-	&SetForegroundWindow(/CabinetWClass/)
+key M2-_1 = &HelpMessage("foregrounding", "vim") \
+	&SetForegroundWindow(/Vim/)
 
-key M2-z = &HelpMessage("foregrounding", "word") \
+key M2-_2 = &HelpMessage("foregrounding", "word") \
 	&SetForegroundWindow(/OpusApp/)
 
-key M2-x = &HelpMessage("foregrounding", "virtualbox") \
-	&SetForegroundWindow(/QWidget/)
-
-key M2-c = &HelpMessage("foregrounding", "firefox") \
+key M2-_3 = &HelpMessage("foregrounding", "firefox") \
 	&SetForegroundWindow(/MozillaWindowClass/)
 
-key M2-v = &HelpMessage("foregrounding", "vim") \
-	&SetForegroundWindow(/Vim/)
+key M2-_4 = &HelpMessage("foregrounding", "virtualbox") \
+	&SetForegroundWindow(/QWidget/)
+
+key M2-e = &HelpMessage("foregrounding", "explorer") \
+	&SetForegroundWindow(/CabinetWClass/)
 # }}}
 
 key M2-*S-Tab	= A-*S-Tab
 key M2-q		= &WindowClose
-key M2-r		= &WindowMaximize
-key M2-S-r		= &WindowMinimize
+key M2-n		= &WindowMonitorTo(current, -1, true, true)
+key M2-p		= &WindowMonitorTo(current, 1, true, true)
+
+key M2-r	= &WindowMaximize
+key M2-S-r	= &WindowMinimize
+key M2-v	= &WindowVMaximize
+key M2-S-v	= &WindowHMaximize
 
 key M2-w = &WindowMove(0, -32)
 key M2-a = &WindowMove(-32, 0)
 key M2-s = &WindowMove(0, 32)
 key M2-d = &WindowMove(32, 0)
 
-key M2-S-w = &WindowVMaximize
-key M2-S-a = &WindowMonitorTo(current, -1, true, true)
-key M2-S-s = &WindowHMaximize
-key M2-S-d = &WindowMonitorTo(current, 1, true, true)
+key M2-S-a = W-Left
+key M2-S-d = W-Right
 # }}}
 
 # searchit {{{

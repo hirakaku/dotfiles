@@ -4,6 +4,10 @@
 colorscheme desert
 set guioptions=
 
+" beep
+set visualbell
+set t_vb=
+
 " window size
 set columns=120
 set lines=32
