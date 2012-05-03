@@ -14,6 +14,10 @@ set visualbell
 highlight Bell display: none;
 " }}}
 
+" Style: disable-ime {{{
+style -name disable-ime chrome://* #liberator-commandline-command input {ime-mode: inactive;}
+" }}}
+
 " Command: {{{
 command! evernote js evernote_doAction()
 command! clearly	js __readable_by_evernote.readable_by_evernote__button__call()

@@ -117,13 +117,13 @@ key *IC-M0-m	= Enter
 key *IC-M0-p	= BackSpace
 key *IC-M0-A-p	= Delete
 
-key *IC-M0-*S-h = *S-Left
-key *IC-M0-*S-j = *S-Down
-key *IC-M0-*S-k = *S-Up
-key *IC-M0-*S-l = *S-Right
+key *IC-M0-*C-*S-h = *C-*S-Left
+key *IC-M0-*C-*S-j = *C-*S-Down
+key *IC-M0-*C-*S-k = *C-*S-Up
+key *IC-M0-*C-*S-l = *C-*S-Right
 
-key *IC-M0-*S-a = *S-Home
-key *IC-M0-*S-e = *S-End
+key *IC-M0-*C-*S-a = *C-*S-Home
+key *IC-M0-*C-*S-e = *C-*S-End
 
 # alt-selection {{{
 key *IC-M0-A-h = S-Left
