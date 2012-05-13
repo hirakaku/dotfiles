@@ -145,12 +145,12 @@ setopt append_history
 setopt extended_history
 
 setopt hist_verify
-setopt hist_no_store
+#setopt hist_no_store
 setopt hist_ignore_space
 setopt hist_reduce_blanks
 
 # dups {{{
-setopt hist_ignore_dups
+# setopt hist_ignore_dups
 setopt hist_find_no_dups
 # }}}
 
