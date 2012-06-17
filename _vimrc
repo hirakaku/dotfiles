@@ -9,9 +9,9 @@ filetype off
 " Feature: vim_starting {{{
 if has('vim_starting')
 	let $dotfiles	= expand('~/dotfiles')
-	let $dotvim = expand('~/.vim')
-	let $bundle = expand('$dotvim/bundle')
-	let $plugin = expand('$dotvim/plugin')
+	let $dotvim		= expand('~/.vim')
+	let $bundle		= expand('$dotvim/bundle')
+	let $plugin		= expand('$dotvim/plugin')
 
 	set runtimepath+=$dotvim/bundle/neobundle.vim
 	call neobundle#rc($bundle)
@@ -19,18 +19,8 @@ endif
 " }}}
 
 " @ github {{{
-NeoBundle 'fuenor/qfixgrep'
-NeoBundle 'fuenor/vim-wordcount'
-NeoBundle 'gregsexton/VimCalc'
-NeoBundle 'guns/xterm-color-table.vim'
-NeoBundle 'houtsnip/vim-emacscommandline'
-" NeoBundle 'kakkyz81/evervim'
-NeoBundle 'kana/vim-smartchr'
-NeoBundle 'kana/vim-textobj-indent'
-NeoBundle 'kana/vim-textobj-lastpat'
-NeoBundle 'kana/vim-textobj-user'
+" NeoBundle 'vim-scripts/YankRing.vim'
 NeoBundle 'Lokaltog/vim-easymotion'
-NeoBundle 'nathanaelkane/vim-indent-guides'
 NeoBundle 'Shougo/echodoc'
 NeoBundle 'Shougo/neobundle.vim'
 NeoBundle 'Shougo/neocomplcache'
@@ -40,6 +30,16 @@ NeoBundle 'Shougo/vimfiler'
 NeoBundle 'Shougo/vimproc'
 NeoBundle 'Shougo/vimshell'
 NeoBundle 'Shougo/vinarise'
+NeoBundle 'fuenor/qfixgrep'
+NeoBundle 'fuenor/vim-wordcount'
+NeoBundle 'gregsexton/VimCalc'
+NeoBundle 'guns/xterm-color-table.vim'
+NeoBundle 'houtsnip/vim-emacscommandline'
+NeoBundle 'kana/vim-smartchr'
+NeoBundle 'kana/vim-textobj-indent'
+NeoBundle 'kana/vim-textobj-lastpat'
+NeoBundle 'kana/vim-textobj-user'
+NeoBundle 'nathanaelkane/vim-indent-guides'
 NeoBundle 'thinca/vim-poslist'
 NeoBundle 'thinca/vim-quickrun'
 NeoBundle 'thinca/vim-ref'
@@ -55,11 +55,10 @@ NeoBundle 'tpope/vim-unimpaired'
 NeoBundle 'tsukkee/unite-tag'
 NeoBundle 'vim-jp/vimdoc-ja'
 NeoBundle 'vim-scripts/DirDiff.vim'
-NeoBundle 'vim-scripts/errormarker.vim'
 NeoBundle 'vim-scripts/Quich-Filter'
 NeoBundle 'vim-scripts/ShowMarks'
+NeoBundle 'vim-scripts/errormarker.vim'
 NeoBundle 'vim-scripts/sudo.vim'
-" NeoBundle 'vim-scripts/YankRing.vim'
 NeoBundle 'zhaocai/unite-scriptnames'
 " }}}
 
@@ -83,14 +82,20 @@ if has('win32') || has('win64')
 	let $winhome	= $HOMEDRIVE . $HOMEPATH
 	let $tmpdirs	= $TEMP
 	let $msys			= $HOME . '/app/msys'
+	let $cygwin		= $HOME . '/app/cygwin'
+	let $vimproc	= $bundle . '/vimproc'
 
-	set shell=$msys/bin/sh.exe\ --login
+	if isdirectory($msys)
+		set shell=$msys/bin/sh.exe\ --login
+	elseif isdirectory($cygwin)
+		set shell=$cygwin/bin/sh.exe\ --login
+	endif
+
 	set shellcmdflag=-c
 	set shellxquote=\"
 else
 	let $osname		= system('uname')
 	let $tmpdirs	= '~/tmp,/var/tmp,/tmp'
-	let $tct			= '~/dev/scqemu/test/tct'
 
 	colorscheme elflord
 	set path=.,,/usr/local/include,/usr/include,./include
@@ -171,6 +176,8 @@ let unite_data_directory = $dotvim . '/.unite'
 " }}}
 
 " Plugin: vimfiler {{{
+let vimfiler_as_default_explorer = 1
+let vimfiler_safe_mode_by_default = 0
 let vimfiler_data_directory = $dotvim . '/.vimfiler'
 " }}}
 
@@ -212,17 +219,6 @@ let quickrun_config.scheme = {
 			\ 'command'		: 'gosh',
 			\ 'outputter'	: 'buffer',
 			\ }
-
-let quickrun_config.tct = {
-			\ 'exec'			: ['%c %o %s %a',
-			\ 'qemu-system-tct -nographic -kernel a.out 2>&1'],
-			\ 'command'		: 'tct-elf-gcc',
-			\ 'cmdopt'		: expand('-T $tct/tct.ld $tct/opc/crt0.s'),
-			\ 'outputter'	: 'mixed',
-			\ }
-
-let quickrun_config['c.tct']		= quickrun_config.tct
-let quickrun_config['asm.tct']	= quickrun_config.tct
 " }}}
 
 " Plugin: Pyclewn {{{

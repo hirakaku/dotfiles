@@ -214,7 +214,6 @@ key M2-e = &HelpMessage("foregrounding", "explorer") \
 	&SetForegroundWindow(/CabinetWClass/)
 # }}}
 
-key M2-*S-Tab	= A-*S-Tab
 key M2-q		= &WindowClose
 key M2-n		= &WindowMonitorTo(current, -1, true, true)
 key M2-p		= &WindowMonitorTo(current, 1, true, true)
@@ -242,7 +241,7 @@ key M0-A-c = C-c &Sync &HelpMessage("searchit (google_jp)", $Clipboard) \
 
 window virtualbox /VirtualBox\.exe/ : global # {{{
 key M0-PrintScreen = RightControl PrintScreen
-key M2-*S-Tab = RightControl A-*S-Tab
+key A-*S-Tab = RightControl A-*S-Tab
 
 key M2-q	= A-F4
 key M2-S-q	= &WindowClose
