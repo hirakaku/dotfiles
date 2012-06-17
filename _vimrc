@@ -40,6 +40,7 @@ NeoBundle 'kana/vim-textobj-indent'
 NeoBundle 'kana/vim-textobj-lastpat'
 NeoBundle 'kana/vim-textobj-user'
 NeoBundle 'nathanaelkane/vim-indent-guides'
+NeoBundle 'scrooloose/nerdtree'
 NeoBundle 'thinca/vim-poslist'
 NeoBundle 'thinca/vim-quickrun'
 NeoBundle 'thinca/vim-ref'
@@ -57,8 +58,11 @@ NeoBundle 'vim-jp/vimdoc-ja'
 NeoBundle 'vim-scripts/DirDiff.vim'
 NeoBundle 'vim-scripts/Quich-Filter'
 NeoBundle 'vim-scripts/ShowMarks'
+NeoBundle 'vim-scripts/ShowMultiBase'
 NeoBundle 'vim-scripts/errormarker.vim'
 NeoBundle 'vim-scripts/sudo.vim'
+NeoBundle 'vim-scripts/taglist.vim'
+NeoBundle 'vim-scripts/wokmarks.vim'
 NeoBundle 'zhaocai/unite-scriptnames'
 " }}}
 
@@ -176,8 +180,8 @@ let unite_data_directory = $dotvim . '/.unite'
 " }}}
 
 " Plugin: vimfiler {{{
-let vimfiler_as_default_explorer = 1
-let vimfiler_safe_mode_by_default = 0
+let vimfiler_as_default_explorer	= 1
+let vimfiler_safe_mode_by_default	= 0
 let vimfiler_data_directory = $dotvim . '/.vimfiler'
 " }}}
 
@@ -266,16 +270,6 @@ command! -nargs=? -complete=file Ci386 call ToggleCmapkeys(gdb_i386, '<args>')
 command! -nargs=? -complete=file Carm call ToggleCmapkeys(gdb_arm, '<args>')
 command! -nargs=* -complete=file Cargs Cset args <args>
 " }}}
-" }}}
-
-" Plugin: evervim {{{
-let evervim_workdir		= $dotvim . '/.evervim'
-let evervim_sortnotes	= 'updated desc'
-let evervim_sortbooks	= 'name asc'
-let evervim_sorttags	= 'name asc'
-let evervim_hidexmlheader = 1
-let evervim_removeemptylineonxml = 1
-let evervim_xmlindent = '	'
 " }}}
 
 " Command: Make {{{
@@ -468,9 +462,10 @@ command! -nargs=0 ShowColors call s:show_colors()
 set number
 set textwidth=0
 set backspace=indent,eol,start
+set hidden
 
 " Plugin: indent-guides {{{
-" <Leader>ig => enable / disable
+" <Leader>ig => toggle indent guides
 " let indent_guides_enable_on_vim_startup = 1
 let indent_guides_guide_size	= 1
 let indent_guides_auto_colors	= 0
@@ -483,11 +478,19 @@ highlight IndentGuidesEven ctermbg=DarkBlue
 set showmatch
 set matchtime=3
 
+" Plugin: ShowMultiBase {{{
+" Help: $bundle/ShowMultiBase/README
+" \=				=> base auto
+" \b/o/d/h=	=> base 2/8/10/16
+let ShowMultiBase_Register_UnnamedBase		= 0
+let ShowMultiBase_Register_ClipboardBase	= 0
+" }}}
+
 " Plugin: YankRing {{{
 let yankring_max_history		= 16
 let yankring_window_height	= 11
 let yankring_manage_numbered_reg		= 1
-let yankring_manual_clipboard_check = 0
+let yankring_manual_clipboard_check	= 0
 let yankring_history_dir	= $dotvim
 let yankring_history_file	= '.yankring'
 " }}}
@@ -504,6 +507,16 @@ highlight ShowMarksHLl ctermfg=Red ctermbg=Black
 highlight ShowMarksHLu ctermfg=Blue ctermbg=Black
 highlight ShowMarksHLo ctermfg=Gray ctermbg=Black
 highlight ShowMarksHLm ctermfg=White ctermbg=Black
+" }}}
+
+" Plugin: wokmarks {{{
+" Help: $bundle/wokmarks.vim/README
+" tm		=> set mark
+" tt		=> toggle mark
+" tl		=> list marks
+" tj/k	=> jump to above/below mark
+" tD		=> delete marks
+let wokmarks_do_maps = 1
 " }}}
 
 " Plugin: errormarker {{{
@@ -554,6 +567,13 @@ if has('cscope')
 		cscope add $CSCOPE_DB
 	endif
 endif
+" }}}
+
+" Plugin: taglist {{{
+let Tlist_Show_One_File		= 1
+let Tlist_Exit_OnlyWindow	= 1
+let Tlist_Auto_Highlight_Tag = 1
+let Tlist_GainFocus_On_ToggleOpen = 1
 " }}}
 
 " Plugin: Quich-Filter {{{
@@ -689,11 +709,16 @@ nnoremap <Esc><Esc>	:noh<CR>
 nnoremap <Leader>vc :Calc<CR>
 nnoremap <Leader>vf :VimFiler<CR>
 nnoremap <Leader>vF :FullScreen<CR>
+nnoremap <Leader>vl :set list!<CR>
 nnoremap <Leader>vm :Make<Space>
+nnoremap <Leader>vn :NERDTree<CR>
 nnoremap <Leader>vs :w !sh<CR>
 nnoremap <Leader>vw :w sudo:%
 nnoremap <Leader>vx :set ft=xxd<CR>:%!xxd<CR>
 nnoremap <Leader>vX :%!xxd -r<CR>:e!<CR>
+
+nnoremap <Leader>V	:so %<CR>
+nnoremap <Leader>Vh	:so $VIMRUNTIME/syntax/hitest.vim<CR>
 " }}}
 
 " Map: quick-e {{{
@@ -707,31 +732,28 @@ let $zshrc				= $dotfiles . '/_zshrc'
 nnoremap <Leader>v		:e $vimrc<CR>
 nnoremap <Leader>vv		:vnew $vimrc<CR>
 nnoremap <Leader>vV		:tabe $vimrc<CR>
-nnoremap <Leader>vg		:e $gvimrc<CR>
-nnoremap <Leader>vgg	:vnew $gvimrc<CR>
-nnoremap <Leader>vG		:tabe $gvimrc<CR>
-nnoremap <Leader>vp		:e $vimperatorrc<CR>
-nnoremap <Leader>vpp	:vnew $vimperatorrc<CR>
-nnoremap <Leader>vP		:tabe $vimperatorrc<CR>
-nnoremap <Leader>vn		:e $nodokarc<CR>
-nnoremap <Leader>vnn	:vnew $nodokarc<CR>
-nnoremap <Leader>vN		:tabe $nodokarc<CR>
-nnoremap <Leader>vt		:e $tmuxrc<CR>
-nnoremap <Leader>vtt	:vnew $tmuxrc<CR>
-nnoremap <Leader>vT		:tabe $tmuxrc<CR>
-nnoremap <Leader>vz		:e $zshrc<CR>
-nnoremap <Leader>vzz	:vnew $zshrc<CR>
-nnoremap <Leader>vZ		:tabe $zshrc<CR>
+nnoremap <Leader>eg		:e $gvimrc<CR>
+nnoremap <Leader>egg	:vnew $gvimrc<CR>
+nnoremap <Leader>eG		:tabe $gvimrc<CR>
+nnoremap <Leader>ep		:e $vimperatorrc<CR>
+nnoremap <Leader>epp	:vnew $vimperatorrc<CR>
+nnoremap <Leader>eP		:tabe $vimperatorrc<CR>
+nnoremap <Leader>en		:e $nodokarc<CR>
+nnoremap <Leader>enn	:vnew $nodokarc<CR>
+nnoremap <Leader>eN		:tabe $nodokarc<CR>
+nnoremap <Leader>et		:e $tmuxrc<CR>
+nnoremap <Leader>ett	:vnew $tmuxrc<CR>
+nnoremap <Leader>eT		:tabe $tmuxrc<CR>
+nnoremap <Leader>ez		:e $zshrc<CR>
+nnoremap <Leader>ezz	:vnew $zshrc<CR>
+nnoremap <Leader>eZ		:tabe $zshrc<CR>
 
-nnoremap <Leader>ve		:e `=tempname()`<CR>
-nnoremap <Leader>vee	:vnew `=tempname()`<CR>
-nnoremap <Leader>vE		:tabe `=tempname()`<CR>
-nnoremap <Leader>vi		:e `=strftime('%y%m%d-%H%M')`<CR>
-nnoremap <Leader>vii	:vnew `=strftime('%y%m%d-%H%M')`<CR>
-nnoremap <Leader>vI		:tabe `=strftime('%y%m%d-%H%M')`<CR>
-
-nnoremap <Leader>V		:so %<CR>
-nnoremap <Leader>Vh		:so $VIMRUNTIME/syntax/hitest.vim<CR>
+nnoremap <Leader>er		:e `=tempname()`<CR>
+nnoremap <Leader>err	:vnew `=tempname()`<CR>
+nnoremap <Leader>eR		:tabe `=tempname()`<CR>
+nnoremap <Leader>ed		:e `=strftime('%y%m%d-%H%M')`<CR>
+nnoremap <Leader>edd	:vnew `=strftime('%y%m%d-%H%M')`<CR>
+nnoremap <Leader>eD		:tabe `=strftime('%y%m%d-%H%M')`<CR>
 
 nnoremap <Leader>:e :e %:h/
 nnoremap <Leader>:n :new %:h/
@@ -813,14 +835,6 @@ vnoremap <Leader>cp	"*y:<C-u>Cprint <C-r>*<CR>
 vnoremap <Leader>cb	"*y:<C-u>Cbreak <C-r>*<CR>
 " }}}
 
-" Map: evervim {{{
-nnoremap <Leader>es	:EvervimSetup<CR>
-nnoremap <Leader>en	:EvervimCreateNote<CR>
-nnoremap <Leader>el	:EvervimNotebookList<CR>
-nnoremap <Leader>et	:EvervimListTags<CR>
-nnoremap <Leader>e/	:EvervimSearhByQuery 
-" }}}
-
 " Map: EasyMotion {{{
 let EasyMotion_leader_key = '_'
 nnoremap __ _
@@ -841,6 +855,10 @@ nnoremap yc :YRClear<CR>
 " Map: visualstar {{{
 map * <Plug>(visualstar-*)N
 map # <Plug>(visualstar-#)N
+" }}}
+
+" Map: taglist {{{
+nnoremap <Leader>t :TlistToggle<CR>
 " }}}
 
 " Map: cscope {{{
@@ -878,9 +896,9 @@ endfunction
 " }}}
 
 nnoremap <Leader>f	:call <SID>filtering()<CR>
-nnoremap <Leader>ff :call <SID>filtering()<CR>
+nnoremap <Leader>ff	:call <SID>filtering()<CR>
 nnoremap <Leader>fi	:call <SID>filtering_input()<CR>
-nnoremap <Leader>fr :call FilteringGetForSource().return()<CR>
+nnoremap <Leader>fr	:call FilteringGetForSource().return()<CR>
 " }}}
 
 " " Map: smartchr {{{
@@ -907,6 +925,7 @@ inoremap <expr> <C-e> pumvisible() ? neocomplcache#cancel_popup() : "\<C-e>"
 augroup noname
 	autocmd!
 	autocmd BufNewFile,BufReadPost * setlocal ts=4 sw=4
+	autocmd BufNewFile,BufReadPost *.rb setlocal ts=2 sw=2
 	autocmd VimEnter * cmap <C-w> <M-BS>
 	autocmd VimEnter *.snip setlocal filetype=snippet
 	autocmd BufReadPost *
@@ -927,8 +946,8 @@ augroup filetype
 				\ | endif
 	autocmd FileType help nnoremap <buffer> q <C-w>c
 	autocmd FileType ref call s:init_vimref()
-	autocmd FileType xml nnoremap <Leader>vf :%!xmllint --format -<CR>
-	autocmd FileType xml vnoremap <Leader>vf :!xmllint --format -<CR>
+	autocmd FileType xml nnoremap <Leader>vxf :%!xmllint --format -<CR>
+	autocmd FileType xml vnoremap <Leader>vxf :!xmllint --format -<CR>
 augroup END
 " }}}
 
