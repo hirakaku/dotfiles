@@ -85,8 +85,8 @@ if has('win32') || has('win64')
 	let $osname		= 'Windows'
 	let $winhome	= $HOMEDRIVE . $HOMEPATH
 	let $tmpdirs	= $TEMP
-	let $msys			= $HOME . '/app/msys'
-	let $cygwin		= $HOME . '/app/cygwin'
+	let $msys			= 'C:/MinGW/msys/1.0'
+	let $cygwin		= 'C:/Cygwin'
 	let $vimproc	= $bundle . '/vimproc'
 
 	if isdirectory($msys)

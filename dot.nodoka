@@ -4,7 +4,7 @@
 # $ProgramW6432/nodoka/109.nodoka
 include "109.nodoka"
 
-# options {{{
+# option {{{
 def option UseTSF			= false
 def option FocusChange		= enable
 def option mouse-event		= true
@@ -13,7 +13,7 @@ def option delay-of !!!		= 30
 # }}}
 
 keymap global # {{{
-# mods {{{
+# mod {{{
 mod Control	+= !!Space
 
 mod Mod0 = !!Eisuu
@@ -53,7 +53,7 @@ key M0-F9 = &HelpMessage("nodoka", "show messages") \
 key M0-U-Eisuu = &CancelPrefix &HelpMessage
 # }}}
 
-# input method {{{
+# input-method {{{
 key ~IL-*Convert		= &SetImeStatus(on)
 key IL-~IC-*NonConvert	= &SetImeStatus(off)
 key IL-IC-*NonConvert	= S-Esc &Sync &SetImeStatus(off)
@@ -158,13 +158,6 @@ key M0-A-U-Tab		= &HelpMessage &MouseHook(None, 0)
 
 key M2-k = WheelForward
 key M2-j = WheelBackward
-
-# mouse-without-boarders {{{
-key M0-A-~R-_1	= C-A-_1
-key M0-A-R-_1	= &Ignore
-key M0-A-~R-_2	= C-A-_2
-key M0-A-R-_2	= &Ignore
-# }}}
 # }}}
 
 # window-control {{{
@@ -172,7 +165,7 @@ key M0-A-R-_2	= &Ignore
 key M2-S-_1 = &HelpMessage("launcher", "vim") \
 	&ShellExecute( \
 		open, \
-		"C:/Users/hirakaku/Dropbox/app/vim/gvim.exe",,, \
+		"C:/Users/hirakaku/Dropbox/app/vim73/gvim.exe",,, \
 		ShowNormal)
 
 key M2-S-_2 = &HelpMessage("launcher", "word") \
@@ -214,6 +207,7 @@ key M2-e = &HelpMessage("foregrounding", "explorer") \
 	&SetForegroundWindow(/CabinetWClass/)
 # }}}
 
+key M0-q		= &WindowClose
 key M2-q		= &WindowClose
 key M2-n		= &WindowMonitorTo(current, -1, true, true)
 key M2-p		= &WindowMonitorTo(current, 1, true, true)
@@ -252,6 +246,7 @@ key W-S-d	= W-d
 # }}}
 
 # invalidation {{{
+window hl2 /hl2\.exe/
 window sai /sai\.exe/
 # }}}
 
