@@ -94,9 +94,6 @@ if has('win32') || has('win64')
 	elseif isdirectory($cygwin)
 		set shell=$cygwin/bin/sh.exe\ --login
 	endif
-
-	set shellcmdflag=-c
-	set shellxquote=\"
 else
 	let $osname		= system('uname')
 	let $tmpdirs	= '~/tmp,/var/tmp,/tmp'
