@@ -85,8 +85,9 @@ if has('win32') || has('win64')
 	let $osname		= 'Windows'
 	let $winhome	= $HOMEDRIVE . $HOMEPATH
 	let $tmpdirs	= $TEMP
-	let $msys			= 'C:/MinGW/msys/1.0'
-	let $cygwin		= 'C:/Cygwin'
+	let $app			= $home . '/app'
+	let $msys			= $app . '/mingw/msys/1.0'
+	let $cygwin		= $app . '/cygwin'
 	let $vimproc	= $bundle . '/vimproc'
 
 	if isdirectory($msys)
@@ -269,6 +270,22 @@ command! -nargs=* -complete=file Cargs Cset args <args>
 " }}}
 " }}}
 
+" Command: Tcd {{{
+let g:tcd = ""
+
+command! -nargs=0 Tcd
+			\		if !empty(g:tcd)
+			\ |		if isdirectory(g:tcd)
+			\ |			exe 'lcd ' . expand(g:tcd)
+			\ |		endif
+			\
+			\ |		let g:tcd = ""
+			\ |	else
+			\ |		let g:tcd = getcwd()
+			\ |		lcd %:p:h
+			\ |	endif
+" }}}
+
 " Command: Make {{{
 " Function: FindBuild() {{{
 function! FindBuild(dir)
@@ -289,11 +306,11 @@ endfunction
 " }}}
 
 command! -nargs=? Make
-			\ let b:build_dir = FindBuild(getcwd()) |
-			\ | if b:build_dir != ''
-				\ | echo b:build_dir
-				\ | exe 'make -C ' . b:build_dir . ' <args>'
-				\ | endif
+			\		let b:build_dir = FindBuild(getcwd()) |
+			\ |		if b:build_dir != ''
+			\ |		echo b:build_dir
+			\ |		exe 'make -C ' . b:build_dir . ' <args>'
+			\ |	endif
 " }}}
 
 " Command: Call, Hook {{{
@@ -938,7 +955,8 @@ augroup END
 augroup filetype
 	autocmd!
 	autocmd FileType * setlocal formatoptions-=ro
-	autocmd FileType vim if &buftype == 'nofile'
+	autocmd FileType vim
+				\ if &buftype == 'nofile'
 				\ | nnoremap <buffer> q <C-w>c
 				\ | endif
 	autocmd FileType help nnoremap <buffer> q <C-w>c

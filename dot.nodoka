@@ -191,7 +191,7 @@ key M2-S-d = W-Right
 # }}}
 
 # vimmer {{{
-key *IC-Kanji = Esc
+# key *IC-Kanji = Esc
 key *IC-M0-OpenBracket = Esc
 
 key *IC-M0-n	= Space
@@ -231,6 +231,8 @@ key M0-A-q = PrintScreen
 # }}}
 
 window virtualbox /VirtualBox\.exe/ : global # {{{
+key Kanji = &Default
+
 key M0-PrintScreen = RightControl PrintScreen
 key A-*S-Tab = RightControl A-*S-Tab
 
@@ -238,12 +240,15 @@ key M2-q	= A-F4
 key M2-S-q	= &WindowClose
 key M2-r	= A-F10
 key M2-S-r	= &WindowMaximize
+
 key W-d		= C-A-d
 key W-S-d	= W-d
+
 # }}}
 
 # invalidation {{{
 window hl2 /hl2\.exe/
+window portal2 /portal2\.exe/
 window sai /sai\.exe/
 # }}}
 
