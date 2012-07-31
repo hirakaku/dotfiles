@@ -116,9 +116,6 @@ key M0-*C-*S-U-Tab		= *C-*S-U-RButton
 key M0-A-D-~R-Tab	= &HelpMessage("scroller", "x12") &MouseHook(Wheel, -12)
 key M0-A-D-R-Tab	= &Ignore
 key M0-A-U-Tab		= &HelpMessage &MouseHook(None, 0)
-
-key M2-k = WheelForward
-key M2-j = WheelBackward
 # }}}
 # }}}
 
@@ -170,7 +167,6 @@ key M2-e = &HelpMessage("foregrounding", "explorer") \
 # }}}
 
 # mod2-window {{{
-key M0-q = &WindowClose
 key M2-q = &WindowClose
 key M2-n = &WindowMonitorTo(current, -1, true, true)
 key M2-p = &WindowMonitorTo(current, 1, true, true)
@@ -187,6 +183,12 @@ key M2-d = &WindowMove(32, 0)
 
 key M2-S-a = W-Left
 key M2-S-d = W-Right
+# }}}
+
+# mod2-sound {{{
+key M2-S-w = VolumeUp
+key M2-S-s = VolumeDown
+key M2-S-x = VolumeMute
 # }}}
 # }}}
 
@@ -216,16 +218,16 @@ key *IC-M0-A-l = S-Right
 key *IC-M0-A-a = S-Home
 key *IC-M0-A-e = S-End
 # }}}
-
-key *IC-M0-M1-*S-j = *S-PageDown
-key *IC-M0-M1-*S-k = *S-PageUp
 # }}}
 
 # app {{{
+# searchit {{{
 key M0-A-c = C-c &Sync &HelpMessage("searchit (google_jp)", $Clipboard) \
 	&PlugIn("searchit", "google_jp", $Clipboard, true)
+# }}}
 
 key M0-A-q = PrintScreen
+key M0-A-w = M-F4
 # }}}
 # }}}
 # }}}
@@ -243,13 +245,12 @@ key M2-S-r	= &WindowMaximize
 
 key W-d		= C-A-d
 key W-S-d	= W-d
-
 # }}}
 
 # invalidation {{{
+window sai /sai\.exe/
 window hl2 /hl2\.exe/
 window portal2 /portal2\.exe/
-window sai /sai\.exe/
 # }}}
 
 # vim: ts=4 sw=4 ff=unix fdm=marker:
