@@ -12,4 +12,7 @@ set t_vb=
 set columns=120
 set lines=32
 
+" font
+set guifont=MeiryoKe_Gothic:h10:cSHIFTJIS
+
 " vim: ts=2 sw=2 ff=unix fdm=marker:
