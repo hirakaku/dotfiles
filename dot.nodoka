@@ -44,7 +44,7 @@ key M0-U-Eisuu = &CancelPrefix &HelpMessage
 # input-method {{{
 key ~IL-*Convert		= &SetImeStatus(on)
 key IL-~IC-*NonConvert	= &SetImeStatus(off)
-key IL-IC-*NonConvert	= S-Esc &Sync &SetImeStatus(off)
+key IL-IC-*NonConvert	= S-Escape &Sync &SetImeStatus(off)
 # }}}
 
 # semicolon-enter {{{
@@ -193,8 +193,8 @@ key M2-S-x = VolumeMute
 # }}}
 
 # vimmer {{{
-# key *IC-Kanji = Esc
-key *IC-M0-OpenBracket = Esc
+# key *IC-Kanji = Escape
+key *IC-M0-OpenBracket = Escape
 
 key *IC-M0-n	= Space
 key *IC-M0-m	= Enter
@@ -247,10 +247,27 @@ key W-d		= C-A-d
 key W-S-d	= W-d
 # }}}
 
+window leeyes /Leeyes\.exe:TMainForm/ : global # {{{
+key M0-w = Up
+key M0-a = Left
+key M0-s = Down
+key M0-d = Right
+
+key M0-e = Delete
+key M0-r = BackSpace
+key M0-f = Enter
+key M0-v = F11
+# }}}
+
+window v2c /V2C\.exe/ : global # {{{
+key M0-Semicolon = C-Enter
+# }}}
+
 # invalidation {{{
-window sai /sai\.exe/
+window csgo /csgo\.exe/
 window hl2 /hl2\.exe/
 window portal2 /portal2\.exe/
+window sai /sai\.exe/
 # }}}
 
 # vim: ts=4 sw=4 ff=unix fdm=marker:
