@@ -7,9 +7,11 @@ umask 022
 typeset -U path
 
 path=(\
-	$HOME/bin		\
-	/usr/local/bin	\
-	/usr/bin		\
+	$HOME/dev/android/android-sdk-linux/platform-tools \
+	$HOME/dev/android/android-sdk-linux/tools \
+	$HOME/bin \
+	/usr/local/bin \
+	/usr/bin \
 	/bin)
 # }}}
 
@@ -17,7 +19,8 @@ path=(\
 export NAME='hirakaku'
 export EMAIL='hirakaku@gmail.com'
 
-export LANG='en_US.UTF-8'
+# export LANG='en_US.UTF-8'
+export LANG='ja_JP.utf8'
 export TERM='xterm-256color'
 export SHELL='/bin/zsh'
 export EDITOR='vim'
@@ -252,6 +255,7 @@ alias apf='apt-file search'
 alias apstall='sudo apt-get install'
 alias apdate='sudo apt-get update'
 alias apgrade='sudo apt-get upgrade'
+alias apremove='sudo apt-get remove'
 # }}}
 
 # gem {{{

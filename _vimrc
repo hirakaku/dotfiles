@@ -5,7 +5,6 @@ set nocompatible
 
 " Plugin: neobundle {{{
 filetype off
-
 " Feature: vim_starting {{{
 if has('vim_starting')
 	let $dotfiles	= expand('~/dotfiles')
@@ -21,6 +20,15 @@ endif
 " @ github {{{
 " NeoBundle 'Shougo/vimproc'
 " NeoBundle 'vim-scripts/YankRing.vim'
+NeoBundle 'Lokaltog/vim-easymotion'
+NeoBundle 'Shougo/echodoc'
+NeoBundle 'Shougo/neobundle.vim'
+NeoBundle 'Shougo/neocomplcache'
+NeoBundle 'Shougo/neocomplcache-snippets-complete'
+NeoBundle 'Shougo/unite.vim'
+NeoBundle 'Shougo/vimfiler'
+NeoBundle 'Shougo/vimshell'
+NeoBundle 'Shougo/vinarise'
 NeoBundle 'fuenor/qfixgrep'
 NeoBundle 'fuenor/vim-wordcount'
 NeoBundle 'gregsexton/VimCalc'
@@ -30,18 +38,11 @@ NeoBundle 'kana/vim-smartchr'
 NeoBundle 'kana/vim-textobj-indent'
 NeoBundle 'kana/vim-textobj-lastpat'
 NeoBundle 'kana/vim-textobj-user'
-NeoBundle 'Lokaltog/vim-easymotion'
+NeoBundle 'nanotech/jellybeans.vim'
 NeoBundle 'nathanaelkane/vim-indent-guides'
 NeoBundle 'scrooloose/nerdtree'
-NeoBundle 'Shougo/echodoc'
-NeoBundle 'Shougo/neobundle.vim'
-NeoBundle 'Shougo/neocomplcache'
-NeoBundle 'Shougo/neocomplcache-snippets-complete'
-NeoBundle 'Shougo/unite.vim'
-NeoBundle 'Shougo/vimfiler'
-NeoBundle 'Shougo/vimshell'
-NeoBundle 'Shougo/vinarise'
 NeoBundle 'taku-o/vim-zoom'
+NeoBundle 'tclem/vim-arduino'
 NeoBundle 'thinca/vim-poslist'
 NeoBundle 'thinca/vim-quickrun'
 NeoBundle 'thinca/vim-ref'
@@ -57,10 +58,10 @@ NeoBundle 'tpope/vim-unimpaired'
 NeoBundle 'tsukkee/unite-tag'
 NeoBundle 'vim-jp/vimdoc-ja'
 NeoBundle 'vim-scripts/DirDiff.vim'
-NeoBundle 'vim-scripts/errormarker.vim'
 NeoBundle 'vim-scripts/Quich-Filter'
 NeoBundle 'vim-scripts/ShowMarks'
 NeoBundle 'vim-scripts/ShowMultiBase'
+NeoBundle 'vim-scripts/errormarker.vim'
 NeoBundle 'vim-scripts/sudo.vim'
 NeoBundle 'vim-scripts/taglist.vim'
 NeoBundle 'vim-scripts/wokmarks.vim'
@@ -100,7 +101,8 @@ else
 	let $osname		= system('uname')
 	let $tmpdirs	= '~/tmp,/var/tmp,/tmp'
 
-	colorscheme elflord
+	colorscheme jellybeans
+
 	set path=.,,/usr/local/include,/usr/include,./include
 endif
 " }}}
@@ -128,8 +130,7 @@ cnoreabbrev rman	Ref man
 cnoreabbrev rpl		Ref perldoc
 cnoreabbrev rpy		Ref pydoc
 
-" Function: s:init_vimref() {{{
-function! s:init_vimref()
+function! s:init_vimref() " {{{
 	nnoremap <buffer> b <Plug>(ref-back)
 	nnoremap <buffer> f <Plug>(ref-forward)
 	nnoremap <buffer> q <C-w>c
@@ -142,8 +143,7 @@ endfunction
 set laststatus=2
 set updatetime=60
 
-" Function: GetFencAndFF() {{{
-function! GetFencAndFF()
+function! GetFencAndFF() " {{{
 	if			&fenc == 'utf-8'				| let fenc = 'u'
 	elseif	&fenc == 'euc-jp'				| let fenc = 'e'
 	elseif	&fenc == 'cp932'				| let fenc = 'c'
@@ -228,8 +228,7 @@ let quickrun_config.scheme = {
 let gdb_i386 = 'gdb'
 let gdb_arm = 'arm-linux-gnueabi-gdb'
 
-" Function: SetPyclewnArgs() {{{
-function! SetPyclewnArgs(gdb, project)
+function! SetPyclewnArgs(gdb, project) " {{{
 	let g:pyclewn_gdb = a:gdb
 
 	let g:pyclewn_args =
@@ -241,8 +240,7 @@ function! SetPyclewnArgs(gdb, project)
 endfunction
 " }}}
 
-" Function: ToggleCmapkeys {{{
-function! ToggleCmapkeys(gdb, project)
+function! ToggleCmapkeys(gdb, project) " {{{
 	if !has('netbeans_enabled')
 		call SetPyclewnArgs(a:gdb, a:project)
 		Pyclewn
@@ -288,8 +286,7 @@ command! -nargs=0 Tcd
 " }}}
 
 " Command: Make {{{
-" Function: FindBuild() {{{
-function! FindBuild(dir)
+function! FindBuild(dir) " {{{
 	let dir = expand(a:dir)
 
 	while dir != '/' && stridx(dir, '/') != -1
@@ -315,8 +312,7 @@ command! -nargs=? Make
 " }}}
 
 " Command: Call, Hook {{{
-" Function: GetSIDs() {{{
-function! GetSIDs(file)
+function! GetSIDs(file) " {{{
 	let file = empty(a:file) ? expand('%:p') : a:file
 
 	redir => scriptnames
@@ -347,15 +343,13 @@ function! GetSIDs(file)
 endfunction
 " }}}
 
-" Function: GetFunction() {{{
-function! GetFunction(file, fnname)
+function! GetFunction(file, fnname) " {{{
 	let sid = get(GetSIDs(a:file), 0, '')
 	return function('<SNR>' . sid . '_' . a:fnname)
 endfunction
 " }}}
 
-" Function: Call() {{{
-function! Call(f, ...)
+function! Call(f, ...) " {{{
 	let [file, fnname] = (a:f =~# ':')
 				\ ? split(a:f, ':')
 				\ : [expand('%:p'), a:f]
@@ -374,8 +368,7 @@ function! Call(f, ...)
 endfunction
 " }}}
 
-" Function: Hook() {{{
-function! Hook(hooked, fn)
+function! Hook(hooked, fn) " {{{
 	let fnpat = "^function('\\(.*\\)')$"
 
 	let hooked = (type(a:hooked) == 2)
@@ -419,8 +412,7 @@ endfunction
 " }}}
 
 " Command: DiffVimVer {{{
-" Function: s:diff_vim_ver() {{{
-function! s:diff_vim_ver(diffed)
+function! s:diff_vim_ver(diffed) " {{{
 	if a:diffed == ''
 		let diffed = expand('~/bin/vim')
 	else
@@ -556,8 +548,7 @@ if has('cscope')
 	set cscopetag
 	set cscopequickfix=t-,e-,s-,g-,c-,d-
 
-	" Function: DetectCscopeOut() {{{
-	function! DetectCscopeOut(dir)
+	function! DetectCscopeOut(dir) " {{{
 		let dir = expand(a:dir)
 
 		while dir != '/' && stridx(dir, '/') != -1
@@ -890,16 +881,14 @@ endif
 " }}}
 
 " Map: Quich-Filter {{{
-" Function: s:filtering() {{{
-function! s:filtering()
+function! s:filtering() " {{{
 	let obj = FilteringNew()
 	call obj.addToParameter('alt', @/)
 	call obj.run()
 endfunction
 " }}}
 
-" Function: s:filtering_input() {{{
-function! s:filtering_input()
+function! s:filtering_input() " {{{
 	let obj = FilteringNew()
 	let query = input('> ')
 
@@ -920,6 +909,24 @@ nnoremap <Leader>fr	:call FilteringGetForSource().return()<CR>
 " inoremap <expr> = smartchr#loop(' = ', '=', ' == ')
 " inoremap <expr> , smartchr#one_of(', ', ',')
 " " }}}
+
+" Map: parenthesis {{{
+inoremap ( ()<Esc>i
+inoremap <expr> ) ClosePair(')')
+inoremap { {}<Esc>i
+inoremap <expr> } ClosePair('}')
+inoremap [ []<Esc>i
+inoremap <expr> ] ClosePair(']')
+
+function! ClosePair(char) " {{{
+	if getline('.')[col('.')-1] == a:char
+		return "\<Right>"
+	else
+		return a:char
+	endif
+endfunction
+" }}}
+" }}}
 
 " Map: neocomplcache {{{
 nnoremap <Leader>ns :NecoSnip<Space>
