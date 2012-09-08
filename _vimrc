@@ -905,18 +905,26 @@ nnoremap <Leader>fi	:call <SID>filtering_input()<CR>
 nnoremap <Leader>fr	:call FilteringGetForSource().return()<CR>
 " }}}
 
-" " Map: smartchr {{{
-" inoremap <expr> = smartchr#loop(' = ', '=', ' == ')
-" inoremap <expr> , smartchr#one_of(', ', ',')
-" " }}}
+" Map: smartchr {{{
+cnoremap <expr> %
+			\ smartchr#loop('%', '%:h', '%:p', {'ctype': ':', 'fallback': '%'})
+cnoremap <expr> /
+			\ smartchr#loop('/', '//', '~/', {'ctype': ':', 'fallback': '/'})
+
+inoremap <expr> = smartchr#loop('=', ' = ', ' == ')
+inoremap <expr> ( smartchr#one_of('(', '()', "(\n)")
+inoremap <expr> { smartchr#one_of('{', '{}', "{\n}")
+inoremap <expr> [ smartchr#one_of('[', '[]', "[\n]")
+inoremap <expr> , smartchr#one_of(',', ', ')
+" }}}
 
 " Map: parenthesis {{{
-inoremap ( ()<Esc>i
-inoremap <expr> ) ClosePair(')')
-inoremap { {}<Esc>i
-inoremap <expr> } ClosePair('}')
-inoremap [ []<Esc>i
-inoremap <expr> ] ClosePair(']')
+" inoremap ( ()<Esc>i
+" inoremap <expr> ) ClosePair(')')
+" inoremap { {}<Esc>i
+" inoremap <expr> } ClosePair('}')
+" inoremap [ []<Esc>i
+" inoremap <expr> ] ClosePair(']')
 
 function! ClosePair(char) " {{{
 	if getline('.')[col('.')-1] == a:char
@@ -941,6 +949,35 @@ inoremap <expr> <C-h> neocomplcache#smart_close_popup() . "\<C-h>"
 inoremap <expr> <C-h> neocomplcache#smart_close_popup() . "\<C-h>"
 inoremap <expr> <C-y> pumvisible() ? neocomplcache#close_popup() : "\<C-y>"
 inoremap <expr> <C-e> pumvisible() ? neocomplcache#cancel_popup() : "\<C-e>"
+" }}}
+
+" Map: alternative to nodoka {{{
+function! Nodoka() " {{{
+	noremap! <C-h> <Left>
+	noremap! <C-j> <Down>
+	noremap! <C-k> <Up>
+	noremap! <C-l> <Right>
+
+	noremap! <C-a> <Home>
+	noremap! <C-e> <End>
+	noremap! <C-@> <BS>
+
+	noremap! <C-q>1 !
+	noremap! <C-q>2 "
+	noremap! <C-q>3 #
+	noremap! <C-q>4 $
+	noremap! <C-q>5 %
+	noremap! <C-q>6 &
+	noremap! <C-q>7 '
+	noremap! <C-q>8 (
+	noremap! <C-q>9 )
+	noremap! <C-q>0 \|
+endfunction
+
+if !has('win32') && !has('win64')
+	call Nodoka()
+endif
+" }}}
 " }}}
 
 " Augroup: {{{
