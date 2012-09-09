@@ -23,7 +23,7 @@ export EMAIL='hirakaku@gmail.com'
 export LANG='ja_JP.utf8'
 export TERM='xterm-256color'
 export SHELL='/bin/zsh'
-export EDITOR='vim'
+export EDITOR='/usr/bin/vim'
 
 # LESS {{{
 LESS='--tabs=4'

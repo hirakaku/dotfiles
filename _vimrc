@@ -18,7 +18,10 @@ endif
 " }}}
 
 " @ github {{{
-" NeoBundle 'Shougo/vimproc'
+if !has('win32') && !has('win64')
+	NeoBundle 'Shougo/vimproc'
+endif
+
 " NeoBundle 'vim-scripts/YankRing.vim'
 NeoBundle 'Lokaltog/vim-easymotion'
 NeoBundle 'Shougo/echodoc'
@@ -189,6 +192,9 @@ let vimshell_temporary_directory = $dotvim . '/.vimshell'
 " }}}
 
 " Plugin: quickrun {{{
+let g:quickrun_no_default_key_mappings = 0
+
+" config {{{
 let quickrun_config = {}
 
 let quickrun_config._ = {
@@ -200,8 +206,9 @@ let quickrun_config._ = {
 			\ 'outputter/buffer/split'		: 'rightb 8split',
 			\ 'outputter/error/error'			: 'quickfix',
 			\ }
+" }}}
 
-" outputter mixed {{{
+" mixed outputter {{{
 let quickrun_mixed = quickrun#outputter#multi#new()
 let quickrun_mixed.config.targets = ['buffer', 'quickfix']
 
@@ -218,6 +225,13 @@ endfunction
 call quickrun#register_outputter('mixed', quickrun_mixed)
 " }}}
 
+let quickrun_config.c = {
+			\ 'runner'	: 'vimproc',
+			\ 'command'	: 'gcc',
+			\ 'cmdopt'	: '-g',
+			\ 'exec'		: ['%c %o %s -o %s:p:r'],
+			\ }
+
 let quickrun_config.scheme = {
 			\ 'command'		: 'gosh',
 			\ 'outputter'	: 'buffer',
@@ -225,6 +239,7 @@ let quickrun_config.scheme = {
 " }}}
 
 " Plugin: Pyclewn {{{
+" Package: sourceforge.net/projects/pyclewn/files/pyclewn-1.9/pyclewn-1.9.py2.tar.gz
 let gdb_i386 = 'gdb'
 let gdb_arm = 'arm-linux-gnueabi-gdb'
 
@@ -767,6 +782,16 @@ nnoremap <Leader>:v :vnew %:h/
 nnoremap <Leader>:t :tabe %:h/
 " }}}
 
+" Map: tab {{{
+nnoremap Te :tabe 
+nnoremap Tt :tabe<CR>
+nnoremap TT :tabe<CR>
+nnoremap Th :tab help 
+nnoremap Td :tabd 
+nnoremap Tc :tabc<CR>
+nnoremap To :tabo<CR>
+" }}}
+
 " Map: selection {{{
 vnoremap <Leader>n ojok
 vnoremap <Leader>N okoj
@@ -824,7 +849,7 @@ nnoremap <Leader>gd :Gdiff<CR>
 " }}}
 
 " Map: quickrun {{{
-map <Leader>r :QuickRun<CR>
+nnoremap <Leader>ra :QuickRun -args 
 " }}}
 
 " Map: Pyclewn {{{
@@ -912,9 +937,9 @@ cnoremap <expr> /
 			\ smartchr#loop('/', '//', '~/', {'ctype': ':', 'fallback': '/'})
 
 inoremap <expr> = smartchr#loop('=', ' = ', ' == ')
-inoremap <expr> ( smartchr#one_of('(', '()', "(\n)")
-inoremap <expr> { smartchr#one_of('{', '{}', "{\n}")
-inoremap <expr> [ smartchr#one_of('[', '[]', "[\n]")
+inoremap <expr> ( smartchr#one_of('(', '()', "(\n)<C-o>O")
+inoremap <expr> { smartchr#one_of('{', '{}', '{{{', "{\n}<C-o>O")
+inoremap <expr> [ smartchr#one_of('[', '[]', "[\n]<C-o>O")
 inoremap <expr> , smartchr#one_of(',', ', ')
 " }}}
 
