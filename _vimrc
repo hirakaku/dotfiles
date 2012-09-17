@@ -22,16 +22,7 @@ if !has('win32') && !has('win64')
 	NeoBundle 'Shougo/vimproc'
 endif
 
-" NeoBundle 'vim-scripts/YankRing.vim'
-NeoBundle 'Lokaltog/vim-easymotion'
-NeoBundle 'Shougo/echodoc'
-NeoBundle 'Shougo/neobundle.vim'
-NeoBundle 'Shougo/neocomplcache'
-NeoBundle 'Shougo/neocomplcache-snippets-complete'
-NeoBundle 'Shougo/unite.vim'
-NeoBundle 'Shougo/vimfiler'
-NeoBundle 'Shougo/vimshell'
-NeoBundle 'Shougo/vinarise'
+" {{{
 NeoBundle 'fuenor/qfixgrep'
 NeoBundle 'fuenor/vim-wordcount'
 NeoBundle 'gregsexton/VimCalc'
@@ -41,9 +32,18 @@ NeoBundle 'kana/vim-smartchr'
 NeoBundle 'kana/vim-textobj-indent'
 NeoBundle 'kana/vim-textobj-lastpat'
 NeoBundle 'kana/vim-textobj-user'
+NeoBundle 'Lokaltog/vim-easymotion'
 NeoBundle 'nanotech/jellybeans.vim'
 NeoBundle 'nathanaelkane/vim-indent-guides'
 NeoBundle 'scrooloose/nerdtree'
+NeoBundle 'Shougo/echodoc'
+NeoBundle 'Shougo/neobundle.vim'
+NeoBundle 'Shougo/neocomplcache'
+NeoBundle 'Shougo/neocomplcache-snippets-complete'
+NeoBundle 'Shougo/unite.vim'
+NeoBundle 'Shougo/vimfiler'
+NeoBundle 'Shougo/vimshell'
+NeoBundle 'Shougo/vinarise'
 NeoBundle 'taku-o/vim-zoom'
 NeoBundle 'tclem/vim-arduino'
 NeoBundle 'thinca/vim-poslist'
@@ -59,16 +59,21 @@ NeoBundle 'tpope/vim-speeddating'
 NeoBundle 'tpope/vim-surround'
 NeoBundle 'tpope/vim-unimpaired'
 NeoBundle 'tsukkee/unite-tag'
+NeoBundle 'ujihisa/unite-colorscheme'
+NeoBundle 'ujihisa/unite-font'
 NeoBundle 'vim-jp/vimdoc-ja'
 NeoBundle 'vim-scripts/DirDiff.vim'
+NeoBundle 'vim-scripts/DrawIt'
+NeoBundle 'vim-scripts/errormarker.vim'
 NeoBundle 'vim-scripts/Quich-Filter'
 NeoBundle 'vim-scripts/ShowMarks'
 NeoBundle 'vim-scripts/ShowMultiBase'
-NeoBundle 'vim-scripts/errormarker.vim'
 NeoBundle 'vim-scripts/sudo.vim'
 NeoBundle 'vim-scripts/taglist.vim'
 NeoBundle 'vim-scripts/wokmarks.vim'
+" NeoBundle 'vim-scripts/YankRing.vim'
 NeoBundle 'zhaocai/unite-scriptnames'
+" }}}
 " }}}
 
 " @ local {{{
@@ -105,6 +110,7 @@ else
 	let $tmpdirs	= '~/tmp,/var/tmp,/tmp'
 
 	colorscheme jellybeans
+	" colorscheme elflord
 
 	set path=.,,/usr/local/include,/usr/include,./include
 endif
@@ -179,6 +185,8 @@ endif
 
 " Plugin: unite {{{
 let unite_data_directory = $dotvim . '/.unite'
+let unite_enable_start_insert = 0
+let unite_source_history_yank_enable = 1
 " }}}
 
 " Plugin: vimfiler {{{
@@ -484,6 +492,7 @@ command! -nargs=0 ShowColors call s:show_colors()
 set number
 set textwidth=0
 set backspace=indent,eol,start
+set virtualedit=
 set hidden
 
 " Plugin: indent-guides {{{
@@ -700,11 +709,14 @@ let poslist_histsize = 1024 * 1024
 " }}}
 " }}}
 
+" Map: {{{
 let mapleader = ','
 
-" Map: {{{
 nnoremap j gj
 nnoremap k gk
+
+vnoremap < <gv
+vnoremap > >gv
 
 " special keys {{{
 map		<Esc>OA <Up>
@@ -719,8 +731,12 @@ imap	<Esc>OH <C-o>0
 imap	<Esc>OF <C-o>$
 " }}}
 
-vnoremap < <gv
-vnoremap > >gv
+" dot {{{
+nnoremap .. .
+nnoremap .d ^D
+nnoremap .o :call append(line('.'), '')<CR>j
+nnoremap .O :call append(line('.')-1, '')<CR>
+" }}}
 
 nnoremap <C-w>e <C-w>=
 
@@ -824,21 +840,53 @@ nnoremap <Leader>vbl :NeoBundleList<CR>
 " }}}
 
 " Map: unite {{{
-nnoremap <Leader>u		:Unite<Space>
-nnoremap <Leader>uf		:Unite file<CR>
-nnoremap <Leader>ut		:Unite tag<CR>
-nnoremap <Leader>utt	:Unite tag<CR>
-nnoremap <Leader>utf	:Unite tag/file<CR>
-nnoremap <Leader>ur		:Unite ref<Space>
-nnoremap <Leader>urm	:Unite ref/man<CR>
-nnoremap <Leader>urp	:Unite ref/perldoc<CR>
-nnoremap <Leader>ury	:Unite ref/pydoc<CR>
-nnoremap <Leader>us		:Unite snippet<CR>
-nnoremap <Leader>uv		:Unite scriptnames<CR>
-nnoremap <Leader>un		:Unite neobundle<CR>
-nnoremap <Leader>unn	:Unite neobundle<CR>
-nnoremap <Leader>uni	:Unite neobundle/install:
-nnoremap <Leader>unl	:Unite neobundle/log<CR>
+if globpath(&rtp, 'plugin/unite.vim') != ''
+	" <Leader>u* {{{
+	nnoremap <Leader>u		:Unite<Space>
+	nnoremap <Leader>uu		:Unite<Space>
+	nnoremap <Leader>uU		:Unite source<CR>
+	nnoremap <Leader>uB		:Unite bookmark<CR>
+
+	nnoremap <Leader>u[		:Unite font<CR>
+	nnoremap <Leader>u]		:Unite colorscheme<CR>
+	nnoremap <Leader>uM		:Unite mapping<CR>
+	nnoremap <Leader>uC		:Unite command<CR>
+	nnoremap <Leader>uF		:Unite function<CR>
+
+	nnoremap <Leader>us		:Unite snippet<CR>
+	nnoremap <Leader>u@		:Unite register<CR>
+	nnoremap <Leader>up		:Unite history/yank<CR>
+	nnoremap <Leader>uc		:Unite change<CR>
+	nnoremap <Leader>uj		:Unite jump<CR>
+
+	nnoremap <Leader>ur		:Unite ref/
+	nnoremap <Leader>urr	:Unite ref/
+	nnoremap <Leader>urm	:Unite ref/man<CR>
+	nnoremap <Leader>urp	:Unite ref/perldoc<CR>
+	nnoremap <Leader>ury	:Unite ref/pydoc<CR>
+
+	nnoremap <Leader>ud		:Unite directory<CR>
+	nnoremap <Leader>udd	:Unite directory<CR>
+	nnoremap <Leader>udn	:Unite directory/new<CR>
+	nnoremap <Leader>udm	:Unite directory_mru<CR>
+	nnoremap <Leader>uf		:Unite file<CR>
+	nnoremap <Leader>uff	:Unite file<CR>
+	nnoremap <Leader>ufr	:Unite file_rec<CR>
+	nnoremap <Leader>ufn	:Unite file/new<CR>
+	nnoremap <Leader>ufm	:Unite file_mru<CR>
+	nnoremap <Leader>ut		:Unite tag<CR>
+	nnoremap <Leader>utt	:Unite tag<CR>
+	nnoremap <Leader>utf	:Unite tag/file<CR>
+	nnoremap <Leader>uta	:Unite tab<CR>
+	nnoremap <Leader>uw		:Unite window<CR>
+	nnoremap <leader>ub		:unite buffer<cr>
+	nnoremap <leader>ubb	:unite buffer<cr>
+	nnoremap <leader>ubt	:unite buffer_tab<cr>
+	" }}}
+
+	" <Leader>U* {{{
+	" }}}
+endif
 " }}}
 
 " Map: fugitive {{{
