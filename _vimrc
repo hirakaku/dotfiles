@@ -1,5 +1,6 @@
-" File:		dotfiles/_vimrc
+" File: dotfiles/_vimrc
 " Author:	hirakaku <hirakaku@gmail.com>
+" Date: 2012/09/22!
 
 set nocompatible
 
@@ -23,19 +24,8 @@ if !has('win32') && !has('win64')
 endif
 
 " {{{
-NeoBundle 'fuenor/qfixgrep'
-NeoBundle 'fuenor/vim-wordcount'
-NeoBundle 'gregsexton/VimCalc'
-NeoBundle 'guns/xterm-color-table.vim'
-NeoBundle 'houtsnip/vim-emacscommandline'
-NeoBundle 'kana/vim-smartchr'
-NeoBundle 'kana/vim-textobj-indent'
-NeoBundle 'kana/vim-textobj-lastpat'
-NeoBundle 'kana/vim-textobj-user'
+" NeoBundle 'vim-jp/vimdoc-ja'
 NeoBundle 'Lokaltog/vim-easymotion'
-NeoBundle 'nanotech/jellybeans.vim'
-NeoBundle 'nathanaelkane/vim-indent-guides'
-NeoBundle 'scrooloose/nerdtree'
 NeoBundle 'Shougo/echodoc'
 NeoBundle 'Shougo/neobundle.vim'
 NeoBundle 'Shougo/neocomplcache'
@@ -44,6 +34,17 @@ NeoBundle 'Shougo/unite.vim'
 NeoBundle 'Shougo/vimfiler'
 NeoBundle 'Shougo/vimshell'
 NeoBundle 'Shougo/vinarise'
+NeoBundle 'fuenor/qfixgrep'
+NeoBundle 'fuenor/vim-wordcount'
+NeoBundle 'gregsexton/VimCalc'
+NeoBundle 'guns/xterm-color-table.vim'
+NeoBundle 'houtsnip/vim-emacscommandline'
+NeoBundle 'kana/vim-textobj-indent'
+NeoBundle 'kana/vim-textobj-lastpat'
+NeoBundle 'kana/vim-textobj-user'
+NeoBundle 'nanotech/jellybeans.vim'
+NeoBundle 'nathanaelkane/vim-indent-guides'
+NeoBundle 'scrooloose/nerdtree'
 NeoBundle 'taku-o/vim-zoom'
 NeoBundle 'tclem/vim-arduino'
 NeoBundle 'thinca/vim-poslist'
@@ -55,23 +56,22 @@ NeoBundle 'tpope/vim-abolish'
 NeoBundle 'tpope/vim-commentary'
 NeoBundle 'tpope/vim-fugitive'
 NeoBundle 'tpope/vim-repeat'
-NeoBundle 'tpope/vim-speeddating'
+" NeoBundle 'tpope/vim-speeddating'
 NeoBundle 'tpope/vim-surround'
 NeoBundle 'tpope/vim-unimpaired'
 NeoBundle 'tsukkee/unite-tag'
 NeoBundle 'ujihisa/unite-colorscheme'
 NeoBundle 'ujihisa/unite-font'
-NeoBundle 'vim-jp/vimdoc-ja'
 NeoBundle 'vim-scripts/DirDiff.vim'
 NeoBundle 'vim-scripts/DrawIt'
-NeoBundle 'vim-scripts/errormarker.vim'
 NeoBundle 'vim-scripts/Quich-Filter'
 NeoBundle 'vim-scripts/ShowMarks'
 NeoBundle 'vim-scripts/ShowMultiBase'
+NeoBundle 'vim-scripts/autodate.vim'
+NeoBundle 'vim-scripts/errormarker.vim'
 NeoBundle 'vim-scripts/sudo.vim'
 NeoBundle 'vim-scripts/taglist.vim'
 NeoBundle 'vim-scripts/wokmarks.vim'
-" NeoBundle 'vim-scripts/YankRing.vim'
 NeoBundle 'zhaocai/unite-scriptnames'
 " }}}
 " }}}
@@ -89,6 +89,7 @@ filetype plugin on
 filetype indent on
 syntax on
 
+" Options: {{{
 " Option: env {{{
 " Option: os {{{
 if has('win32') || has('win64')
@@ -177,26 +178,20 @@ set statusline+=%=
 set statusline+=%04l,%04v\ %L*%P
 " }}}
 
-" Feature: quickfix {{{
-if has('quickfix')
-	cnoreabbrev vcope rightb cope 80
-endif
-" }}}
-
 " Plugin: unite {{{
 let unite_data_directory = $dotvim . '/.unite'
 let unite_enable_start_insert = 0
 let unite_source_history_yank_enable = 1
 " }}}
 
+" Plugin: vimshell {{{
+let vimshell_temporary_directory = $dotvim . '/.vimshell'
+" }}}
+
 " Plugin: vimfiler {{{
 let vimfiler_as_default_explorer	= 1
 let vimfiler_safe_mode_by_default	= 0
 let vimfiler_data_directory = $dotvim . '/.vimfiler'
-" }}}
-
-" Plugin: vimshell {{{
-let vimshell_temporary_directory = $dotvim . '/.vimshell'
 " }}}
 
 " Plugin: quickrun {{{
@@ -334,106 +329,6 @@ command! -nargs=? Make
 			\ |	endif
 " }}}
 
-" Command: Call, Hook {{{
-function! GetSIDs(file) " {{{
-	let file = empty(a:file) ? expand('%:p') : a:file
-
-	redir => scriptnames
-	silent! scriptnames
-	redir END
-
-	let sids = []
-	let spat = '\v\s*(\d+):\s*(.*)$'
-
-	let fpat = '\V'
-				\ . substitute(file, '\\', '/', 'g')
-				\ . '\v%(\.vim)?$'
-
-	for s in split(scriptnames, "\n")
-		let m = matchlist(s, spat)
-
-		if empty(m) | continue | endif
-
-		let [sid, script] = m[1 : 2]
-		let script = fnamemodify(script, ':p:gs?\\?/?')
-
-		if script =~# fpat
-			call add(sids, sid)
-		endif
-	endfor
-
-	return sids
-endfunction
-" }}}
-
-function! GetFunction(file, fnname) " {{{
-	let sid = get(GetSIDs(a:file), 0, '')
-	return function('<SNR>' . sid . '_' . a:fnname)
-endfunction
-" }}}
-
-function! Call(f, ...) " {{{
-	let [file, fnname] = (a:f =~# ':')
-				\ ? split(a:f, ':')
-				\ : [expand('%:p'), a:f]
-
-	let sids = GetSIDs(file)
-
-	for sid in sids
-		if exists('*<SNR>' . sid . '_' . fnname)
-			let fn = '<SNR>' . sid . '_' . fnname
-			return call(fn, a:000)
-		endif
-	endfor
-
-	echoerr 'Failed to call script local function: ' . a:f
-	return -1
-endfunction
-" }}}
-
-function! Hook(hooked, fn) " {{{
-	let fnpat = "^function('\\(.*\\)')$"
-
-	let hooked = (type(a:hooked) == 2)
-				\ ? substitute(string(a:hooked), fnpat, '\1', '')
-				\ : a:hooked
-
-	let fn = (type(a:fn) == 2)
-				\ ? substitute(string(a:fn), fnpat, '\1', '')
-				\ : a:fn
-
-	exe printf("function! %s(...)\n"
-				\ . "\treturn call('%s', a:000)\n"
-				\ . "endfunction",
-				\ hooked, fn)
-endfunction
-" }}}
-
-command! -nargs=+ Call echo Call(<f-args>)
-command! -nargs=+ Hook call Hook(<f-args>)
-
-" Test: :Call {{{
-" :echo GetSIDs('')
-" :let F = GetFunction('', 'Test') | echo F(0) => 1
-" :Call Test 0 => 1
-function! s:Test(nr)
-	return a:nr + 1
-endfunction
-" }}}
-
-" Test: :Hook {{{
-" :Hook A B
-" :call A() => Hello, B!
-function! A()
-	echo 'Hello, A!'
-endfunction
-
-function! B()
-	echo 'Hello, B!'
-endfunction
-" }}}
-" }}}
-
 " Command: DiffVimVer {{{
 function! s:diff_vim_ver(diffed) " {{{
 	if a:diffed == ''
@@ -495,6 +390,10 @@ set backspace=indent,eol,start
 set virtualedit=
 set hidden
 
+" parenthesis
+set showmatch
+set matchtime=3
+
 " Plugin: indent-guides {{{
 " <Leader>ig => toggle indent guides
 " let indent_guides_enable_on_vim_startup = 1
@@ -505,25 +404,12 @@ highlight IndentGuidesOdd ctermbg=DarkRed
 highlight IndentGuidesEven ctermbg=DarkBlue
 " }}}
 
-" parenthesis
-set showmatch
-set matchtime=3
-
 " Plugin: ShowMultiBase {{{
 " Help: $bundle/ShowMultiBase/README
 " \=				=> base auto
 " \b/o/d/h=	=> base 2/8/10/16
 let ShowMultiBase_Register_UnnamedBase		= 0
 let ShowMultiBase_Register_ClipboardBase	= 0
-" }}}
-
-" Plugin: YankRing {{{
-let yankring_max_history		= 16
-let yankring_window_height	= 11
-let yankring_manage_numbered_reg		= 1
-let yankring_manual_clipboard_check	= 0
-let yankring_history_dir	= $dotvim
-let yankring_history_file	= '.yankring'
 " }}}
 " }}}
 
@@ -564,8 +450,14 @@ set incsearch
 set ignorecase
 set smartcase
 
-" tag
 set tags=./tags,tags;
+
+" Plugin: taglist {{{
+let Tlist_Show_One_File		= 1
+let Tlist_Exit_OnlyWindow	= 1
+let Tlist_Auto_Highlight_Tag = 1
+let Tlist_GainFocus_On_ToggleOpen = 1
+" }}}
 
 " Feature: cscope {{{
 if has('cscope')
@@ -599,13 +491,6 @@ if has('cscope')
 endif
 " }}}
 
-" Plugin: taglist {{{
-let Tlist_Show_One_File		= 1
-let Tlist_Exit_OnlyWindow	= 1
-let Tlist_Auto_Highlight_Tag = 1
-let Tlist_GainFocus_On_ToggleOpen = 1
-" }}}
-
 " Plugin: Quich-Filter {{{
 let filteringDefaultContextLines = 0
 " }}}
@@ -629,6 +514,16 @@ let QFix_PreviewWrap = 0
 let MyGrep_Key	= 'g'
 let MyGrep_KeyB	= '<Leader>'
 " }}}
+
+" Command: Csvh {{{
+" Help: highlight csv column
+function! CSVH(x)
+	execute 'match Keyword /^\([^,]*,\)\{'.a:x.'}\zs[^,]*/'
+	execute 'normal ^' . a:x . 'f,'
+endfunction
+
+command! -nargs=1 Csvh :call CSVH(<args>)
+" }}}
 " }}}
 
 " Option: completion {{{
@@ -641,8 +536,8 @@ set completeopt=longest,menuone,preview
 
 " Plugin: necomplcache {{{
 let neocomplcache_enable_at_startup = 1
-let neocomplcache_temporary_dir	= $dotvim . '/.neco'
 let neocomplcache_snippets_dir	= $dotvim . '/snip'
+let neocomplcache_temporary_dir	= $dotvim . '/.neco'
 let neocomplcache_min_syntax_length = 3
 let neocomplcache_enable_smart_case = 1
 let neocomplcache_enable_camel_case_completion	= 1
@@ -679,6 +574,13 @@ command! -nargs=* NecoSnip NeoComplCacheEditSnippets <args>
 command! -nargs=* NecoRSnip NeoComplCacheEditRuntimeSnippets <args>
 " }}}
 " }}}
+
+" Plugin: autodate {{{
+" Help: $bundle/autodate.vim/README
+let autodate_keyword_pre = '.*Date: '
+let autodate_keyword_post = '!'
+let autodate_format = '%Y/%m/%d'
+" }}}
 " }}}
 
 " Option: history {{{
@@ -708,7 +610,9 @@ set backupdir=$tmpdirs
 let poslist_histsize = 1024 * 1024
 " }}}
 " }}}
+" }}}
 
+" Maps: {{{
 " Map: {{{
 let mapleader = ','
 
@@ -729,6 +633,35 @@ cmap	<Esc>OH <C-a>
 cmap	<Esc>OF <C-e>
 imap	<Esc>OH <C-o>0
 imap	<Esc>OF <C-o>$
+" }}}
+
+" nodoka {{{
+function! Nodoka() " {{{
+	noremap! <C-h> <Left>
+	noremap! <C-j> <Down>
+	noremap! <C-k> <Up>
+	noremap! <C-l> <Right>
+
+	noremap! <C-a> <Home>
+	noremap! <C-e> <End>
+	noremap! <C-@> <BS>
+
+	noremap! <C-q>1 !
+	noremap! <C-q>2 "
+	noremap! <C-q>3 #
+	noremap! <C-q>4 $
+	noremap! <C-q>5 %
+	noremap! <C-q>6 &
+	noremap! <C-q>7 '
+	noremap! <C-q>8 (
+	noremap! <C-q>9 )
+	noremap! <C-q>0 \|
+endfunction
+
+if !has('win32') && !has('win64')
+	call Nodoka()
+endif
+" }}}
 " }}}
 
 " dot {{{
@@ -754,11 +687,7 @@ nnoremap <Leader>vw :w sudo:%
 nnoremap <Leader>vx :set ft=xxd<CR>:%!xxd<CR>
 nnoremap <Leader>vX :%!xxd -r<CR>:e!<CR>
 
-nnoremap <Leader>V	:so %<CR>
-nnoremap <Leader>Vh	:so $VIMRUNTIME/syntax/hitest.vim<CR>
-" }}}
-
-" Map: quick-e {{{
+" quick-e {{{
 let $vimrc				= $dotfiles . '/_vimrc'
 let $gvimrc				= $dotfiles . '/_gvimrc'
 let $vimperatorrc	= $dotfiles . '/_vimperatorrc'
@@ -798,7 +727,10 @@ nnoremap <Leader>:v :vnew %:h/
 nnoremap <Leader>:t :tabe %:h/
 " }}}
 
-" Map: tab {{{
+nnoremap <Leader>V	:so %<CR>
+nnoremap <Leader>Vh	:so $VIMRUNTIME/syntax/hitest.vim<CR>
+
+" tab {{{
 nnoremap Te :tabe 
 nnoremap Tt :tabe<CR>
 nnoremap TT :tabe<CR>
@@ -808,7 +740,7 @@ nnoremap Tc :tabc<CR>
 nnoremap To :tabo<CR>
 " }}}
 
-" Map: selection {{{
+" selection {{{
 vnoremap <Leader>n ojok
 vnoremap <Leader>N okoj
 vnoremap a/ :<C-u>silent! normal! [/V]/<CR>
@@ -818,7 +750,7 @@ vnoremap i* :<C-u>silent! normal! [*jV]*k<CR>
 nnoremap <expr> gV '`[' . strpart(getregtype(), 0, 1) . '`]'
 " }}}
 
-" Map: expand {{{
+" expand {{{
 inoremap <expr> <C-r>:: expand('%')
 inoremap <expr> <C-r>:/ expand('%:p')
 inoremap <expr> <C-r>:~ expand('%:~')
@@ -826,12 +758,9 @@ inoremap <expr> <C-r>:. expand('%:.')
 inoremap <expr> <C-r>:f expand('%:t')
 inoremap <expr> <C-r>:d expand('%:p:h')
 " }}}
-
-" Map: substitution {{{
-vnoremap <Leader>st :s/\t\+/ /g
 " }}}
 
-" Map: neobundle {{{
+" Map: neobundle (v) {{{
 nnoremap <Leader>vbi :NeoBundleInstall<CR>
 nnoremap <Leader>vbu :NeoBundleInstall!<Space>
 nnoremap <Leader>vbc :NeoBundleClean<CR>
@@ -839,7 +768,7 @@ nnoremap <Leader>vbd :NeoBundleDocs<CR>
 nnoremap <Leader>vbl :NeoBundleList<CR>
 " }}}
 
-" Map: unite {{{
+" Map: unite (u) {{{
 if globpath(&rtp, 'plugin/unite.vim') != ''
 	" <Leader>u* {{{
 	nnoremap <Leader>u		:Unite<Space>
@@ -889,18 +818,25 @@ if globpath(&rtp, 'plugin/unite.vim') != ''
 endif
 " }}}
 
-" Map: fugitive {{{
+" Map: quickrun (r) {{{
+nnoremap <Leader>ra :QuickRun -args 
+" }}}
+
+" Map: poslist (^o/^i) {{{
+map <C-o> <Plug>(poslist-prev-pos)
+map <C-i> <Plug>(poslist-next-pos)
+map <Leader><C-o> <Plug>(poslist-prev-buf)
+map <Leader><C-i> <Plug>(poslist-next-buf)
+" }}}
+
+" Map: fugitive (g) {{{
 nnoremap <Leader>gs :Gstatus<CR>
 nnoremap <Leader>gl :Git log<CR>
 nnoremap <Leader>gt :Git tag<CR>
 nnoremap <Leader>gd :Gdiff<CR>
 " }}}
 
-" Map: quickrun {{{
-nnoremap <Leader>ra :QuickRun -args 
-" }}}
-
-" Map: Pyclewn {{{
+" Map: Pyclewn (c) {{{
 nnoremap <Leader>c	:Ci386<CR>
 nnoremap <Leader>cI	:Ci386<CR>
 nnoremap <Leader>cA	:Carm<CR>
@@ -914,33 +850,11 @@ vnoremap <Leader>cp	"*y:<C-u>Cprint <C-r>*<CR>
 vnoremap <Leader>cb	"*y:<C-u>Cbreak <C-r>*<CR>
 " }}}
 
-" Map: EasyMotion {{{
-let EasyMotion_leader_key = '_'
-nnoremap __ _
-" }}}
-
-" Map: poslist {{{
-map <C-o> <Plug>(poslist-prev-pos)
-map <C-i> <Plug>(poslist-next-pos)
-map <Leader><C-o> <Plug>(poslist-prev-buf)
-map <Leader><C-i> <Plug>(poslist-next-buf)
-" }}}
-
-" Map: YankRing {{{
-nnoremap yr :YRShow<CR>
-nnoremap yc :YRClear<CR>
-" }}}
-
-" Map: visualstar {{{
-map * <Plug>(visualstar-*)N
-map # <Plug>(visualstar-#)N
-" }}}
-
-" Map: taglist {{{
+" Map: taglist (t) {{{
 nnoremap <Leader>t :TlistToggle<CR>
 " }}}
 
-" Map: cscope {{{
+" Map: cscope (t) {{{
 if has('cscope')
 	nnoremap <Leader>tf :cs find file<Space>
 	nnoremap <Leader>ti :cs find include<Space>
@@ -953,7 +867,22 @@ if has('cscope')
 endif
 " }}}
 
-" Map: Quich-Filter {{{
+" Map: neocomplcache (n) {{{
+nnoremap <Leader>ns :NecoSnip<Space>
+nnoremap <Leader>nS :NecoRSnip<Space>
+" imap <C-l> <Plug>(neocomplcache_snippets_expand)
+" smap <C-l> <Plug>(neocomplcache_snippets_expand)
+" inoremap <expr> <C-g> neocomplcache#undo_completion()
+" inoremap <expr> <C-l> neocomplcache#complete_common_string()
+" inoremap <expr> <CR> neocomplcache#smart_close_popup() . "\<CR>"
+" inoremap <expr> <Tab> pumvisible() ? "\<C-n>" : "\<Tab>"
+" inoremap <expr> <C-h> neocomplcache#smart_close_popup() . "\<C-h>"
+" inoremap <expr> <C-h> neocomplcache#smart_close_popup() . "\<C-h>"
+" inoremap <expr> <C-y> pumvisible() ? neocomplcache#close_popup() : "\<C-y>"
+" inoremap <expr> <C-e> pumvisible() ? neocomplcache#cancel_popup() : "\<C-e>"
+" }}}
+
+" Map: Quich-Filter (f) {{{
 function! s:filtering() " {{{
 	let obj = FilteringNew()
 	call obj.addToParameter('alt', @/)
@@ -978,81 +907,18 @@ nnoremap <Leader>fi	:call <SID>filtering_input()<CR>
 nnoremap <Leader>fr	:call FilteringGetForSource().return()<CR>
 " }}}
 
-" Map: smartchr {{{
-cnoremap <expr> %
-			\ smartchr#loop('%', '%:h', '%:p', {'ctype': ':', 'fallback': '%'})
-cnoremap <expr> /
-			\ smartchr#loop('/', '//', '~/', {'ctype': ':', 'fallback': '/'})
-
-inoremap <expr> = smartchr#loop('=', ' = ', ' == ')
-inoremap <expr> ( smartchr#one_of('(', '()', "(\n)<C-o>O")
-inoremap <expr> { smartchr#one_of('{', '{}', '{{{', "{\n}<C-o>O")
-inoremap <expr> [ smartchr#one_of('[', '[]', "[\n]<C-o>O")
-inoremap <expr> , smartchr#one_of(',', ', ')
+" Map: visualstar (*/#) {{{
+map * <Plug>(visualstar-*)N
+map # <Plug>(visualstar-#)N
 " }}}
 
-" Map: parenthesis {{{
-" inoremap ( ()<Esc>i
-" inoremap <expr> ) ClosePair(')')
-" inoremap { {}<Esc>i
-" inoremap <expr> } ClosePair('}')
-" inoremap [ []<Esc>i
-" inoremap <expr> ] ClosePair(']')
-
-function! ClosePair(char) " {{{
-	if getline('.')[col('.')-1] == a:char
-		return "\<Right>"
-	else
-		return a:char
-	endif
-endfunction
+" Map: EasyMotion (_) {{{
+let EasyMotion_leader_key = '_'
+nnoremap __ _
 " }}}
 " }}}
 
-" Map: neocomplcache {{{
-nnoremap <Leader>ns :NecoSnip<Space>
-nnoremap <Leader>nS :NecoRSnip<Space>
-imap <C-l> <Plug>(neocomplcache_snippets_expand)
-smap <C-l> <Plug>(neocomplcache_snippets_expand)
-inoremap <expr> <C-g> neocomplcache#undo_completion()
-" inoremap <expr> <C-l> neocomplcache#complete_common_string()
-" inoremap <expr> <CR> neocomplcache#smart_close_popup() . "\<CR>"
-" inoremap <expr> <Tab> pumvisible() ? "\<C-n>" : "\<Tab>"
-inoremap <expr> <C-h> neocomplcache#smart_close_popup() . "\<C-h>"
-inoremap <expr> <C-h> neocomplcache#smart_close_popup() . "\<C-h>"
-inoremap <expr> <C-y> pumvisible() ? neocomplcache#close_popup() : "\<C-y>"
-inoremap <expr> <C-e> pumvisible() ? neocomplcache#cancel_popup() : "\<C-e>"
-" }}}
-
-" Map: alternative to nodoka {{{
-function! Nodoka() " {{{
-	noremap! <C-h> <Left>
-	noremap! <C-j> <Down>
-	noremap! <C-k> <Up>
-	noremap! <C-l> <Right>
-
-	noremap! <C-a> <Home>
-	noremap! <C-e> <End>
-	noremap! <C-@> <BS>
-
-	noremap! <C-q>1 !
-	noremap! <C-q>2 "
-	noremap! <C-q>3 #
-	noremap! <C-q>4 $
-	noremap! <C-q>5 %
-	noremap! <C-q>6 &
-	noremap! <C-q>7 '
-	noremap! <C-q>8 (
-	noremap! <C-q>9 )
-	noremap! <C-q>0 \|
-endfunction
-
-if !has('win32') && !has('win64')
-	call Nodoka()
-endif
-" }}}
-" }}}
-
+" Augroups {{{
 " Augroup: {{{
 augroup noname
 	autocmd!
@@ -1099,6 +965,7 @@ augroup neocomplcache
 	autocmd FileType ruby setlocal omnifunc=rubycomplete#Complete
 	autocmd FileType xml setlocal omnifunc=xmlcomplete#CompleteTagsinoremap
 augroup END
+" }}}
 " }}}
 
 " vim: ts=2 sw=2 fdm=marker:
