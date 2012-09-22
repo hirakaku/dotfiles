@@ -24,7 +24,7 @@ if !has('win32') && !has('win64')
 endif
 
 " {{{
-" NeoBundle 'vim-jp/vimdoc-ja'
+" NeoBundle 'tpope/vim-speeddating'
 NeoBundle 'Lokaltog/vim-easymotion'
 NeoBundle 'Shougo/echodoc'
 NeoBundle 'Shougo/neobundle.vim'
@@ -56,12 +56,12 @@ NeoBundle 'tpope/vim-abolish'
 NeoBundle 'tpope/vim-commentary'
 NeoBundle 'tpope/vim-fugitive'
 NeoBundle 'tpope/vim-repeat'
-" NeoBundle 'tpope/vim-speeddating'
 NeoBundle 'tpope/vim-surround'
 NeoBundle 'tpope/vim-unimpaired'
 NeoBundle 'tsukkee/unite-tag'
 NeoBundle 'ujihisa/unite-colorscheme'
 NeoBundle 'ujihisa/unite-font'
+NeoBundle 'vim-jp/vimdoc-ja'
 NeoBundle 'vim-scripts/DirDiff.vim'
 NeoBundle 'vim-scripts/DrawIt'
 NeoBundle 'vim-scripts/Quich-Filter'
@@ -532,23 +532,20 @@ set wildmode=longest,list,full
 
 " insert-mode completion
 set showfulltag
-set completeopt=longest,menuone,preview
+set complete=.,w,b,u,k,i,d,t
+set completeopt=menuone
 
-" Plugin: necomplcache {{{
+" Plugin: neocomplcache {{{
 let neocomplcache_enable_at_startup = 1
+
 let neocomplcache_snippets_dir	= $dotvim . '/snip'
 let neocomplcache_temporary_dir	= $dotvim . '/.neco'
-let neocomplcache_min_syntax_length = 3
-let neocomplcache_enable_smart_case = 1
+let neocomplcache_lock_buffer_name_pattern = ''
+
+let neocomplcache_enable_ignore_case						= 1
+let neocomplcache_enable_smart_case							= 1
 let neocomplcache_enable_camel_case_completion	= 1
 let neocomplcache_enable_underbar_completion		= 1
-
-" dictionaries {{{
-let g:neocomplcache_dictionary_filetype_lists = {
-			\ 'default'		: '',
-			\ 'vimshell'	: '~/.zsh_history',
-			\ }
-" }}}
 
 " keyword patterns {{{
 if !exists('g:neocomplcache_keyword_patterns')
@@ -558,18 +555,14 @@ endif
 let g:neocomplcache_keyword_patterns['default'] = '\h\w*'
 " }}}
 
-" " omni patterns {{{
-" if !exists('g:neocomplcache_omni_patterns')
-" 	let g:neocomplcache_omni_patterns = {}
-" endif
-" 
-" let g:neocomplcache_omni_patterns.c = '\%(\.\|->\)\h\w*'
-" let g:neocomplcache_omni_patterns.cpp = '\h\w*\%(\.\|->\)\h\w*\|\h\w*::'
-" let g:neocomplcache_omni_patterns.php = '[^. \t]->\h\w*\|\h\w*::'
-" let g:neocomplcache_omni_patterns.ruby = '[^. *\t]\.\w*\|\h\w*::'
-" " }}}
+" dictionary lists {{{
+let g:neocomplcache_dictionary_filetype_lists = {
+			\ 'default'		: '',
+			\ 'vimshell'	: '~/.zsh_history',
+			\ }
+" }}}
 
-" Command: neocomplcache {{{
+" Command: NecoSnip {{{
 command! -nargs=* NecoSnip NeoComplCacheEditSnippets <args>
 command! -nargs=* NecoRSnip NeoComplCacheEditRuntimeSnippets <args>
 " }}}
@@ -730,6 +723,10 @@ nnoremap <Leader>:t :tabe %:h/
 nnoremap <Leader>V	:so %<CR>
 nnoremap <Leader>Vh	:so $VIMRUNTIME/syntax/hitest.vim<CR>
 
+" help {{{
+map <F1> "zyw:exe "H ".@z<CR><C-w>p
+" }}}
+
 " tab {{{
 nnoremap Te :tabe 
 nnoremap Tt :tabe<CR>
@@ -870,6 +867,9 @@ endif
 " Map: neocomplcache (n) {{{
 nnoremap <Leader>ns :NecoSnip<Space>
 nnoremap <Leader>nS :NecoRSnip<Space>
+
+inoremap <expr><C-x><C-f> neocomplcache#manual_filename_complete()
+
 " imap <C-l> <Plug>(neocomplcache_snippets_expand)
 " smap <C-l> <Plug>(neocomplcache_snippets_expand)
 " inoremap <expr> <C-g> neocomplcache#undo_completion()
